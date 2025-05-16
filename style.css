@@ -1,0 +1,125 @@
+:root {
+  --bg: #1e1e1e;
+  --fg: #cdd6f4;
+  --primary: #cba6f7;
+  --secondary: #a6adc8;
+  --card: #2e2e2e;
+  --highlight: #45475a;
+  --shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background: var(--bg);
+  color: white;
+  padding: 2rem 1rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+nav button {
+  background: none;
+  border: none;
+  color: var(--secondary);
+  font-size: 1rem;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color 0.3s, border-bottom-color 0.3s;
+}
+
+nav button.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: bold;
+}
+
+main {
+  flex: 1;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+section {
+  display: none;
+  opacity: 0;
+  transform: translateY(20px);
+  animation-fill-mode: forwards;
+}
+
+section.active {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.card {
+  flex: 1 1 45%;
+  background: var(--card);
+  border: 2px solid var(--highlight);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 2rem;
+}
+
+h2 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 0.5rem;
+}
+
+.contact p {
+  margin: 0.5rem 0;
+}
+
+footer {
+  background: var(--card);
+  color: var(--secondary);
+  text-align: center;
+  padding: 1rem;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    flex: 1 1 100%;
+  }
+}
