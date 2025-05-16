@@ -4,71 +4,147 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Luca's Website</title>
-  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#1e1e1e',
+            fg: '#cdd6f4',
+            primary: '#cba6f7',
+            secondary: '#a6adc8',
+            card: '#2e2e2e',
+            highlight: '#45475a',
+          },
+          boxShadow: {
+            custom: '0 4px 12px rgba(0,0,0,0.1)',
+            'inner-custom': '0 -2px 8px rgba(0,0,0,0.1)',
+          },
+          keyframes: {
+            'fade-in-up': {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          },
+          animation: {
+            'fade-in-up': 'fade-in-up 0.6s ease forwards',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    [v-cloak] { display: none; }
+  </style>
 </head>
-<body>
+<body class="bg-bg text-fg font-sans min-h-screen flex flex-col">
 
-  <header>
-    <h1>Luca’s Website</h1>
-  </header>
+  <div id="app" class="flex flex-col flex-1">
 
-  <nav>
-    <button class="tab-button active" data-tab="tab1">About Me</button>
-    <button class="tab-button" data-tab="tab2">Cats</button>
-    <!-- <button class="tab-button" data-tab="tab3">Tab 3</button>
-    <button class="tab-button" data-tab="tab4">Tab 4</button>
-    <button class="tab-button" data-tab="tab5">Tab 5</button>
-    <button class="tab-button" data-tab="tab6">Tab 6</button> -->
-  </nav>
+    <header class="bg-bg text-white text-center py-8 shadow-custom">
+      <h1 class="text-3xl font-bold">Luca’s Website</h1>
+    </header>
 
-  <main>
-    <section id="tab1" class="active">
-      <div class="card">
-        <h2>About Me</h2>
-        <p>Hello, I am Luca, and this is my website.</p>
-      </div>
-      <div class="card">
-        <h2>Find Me Online</h2>
-        <div class="contact">
-          <p><strong>Roblox:</strong> codyferd</p>
-          <p><strong>GitHub:</strong> codyferd</p>
-          <p><strong>TikTok:</strong> @polycat.codyferd</p>
-          <p><strong>YouTube:</strong> polycat.codyferd</p>
-          <p><strong>Mastodon:</strong> codyferd@mastodon.social</p>
-          <p><strong>Snapchat:</strong> polycatcodyferd</p>
-          <p><strong>Discord:</strong> codyferd_81690</p>
-          <p><strong>PeerTube:</strong> polycat@video.sadmin.io</p>
+    <nav class="flex flex-wrap justify-center bg-card shadow-custom">
+      <button
+        v-for="tab in tabs"
+        :key="tab.id"
+        @click="selectTab(tab.id)"
+        v-cloak
+        :class="[
+          'bg-transparent border-none text-secondary text-base py-4 px-6 cursor-pointer border-b-4 transition-colors duration-300',
+          currentTab === tab.id
+            ? 'text-primary border-primary font-bold'
+            : 'border-transparent hover:text-primary'
+        ]"
+      >
+        {{ tab.label }}
+      </button>
+    </nav>
+
+    <main class="flex-1 max-w-[1000px] mx-auto my-8 px-4 flex flex-col gap-8">
+      <section
+        v-for="tab in tabs"
+        :key="tab.id"
+        v-show="currentTab === tab.id"
+        class="flex flex-wrap gap-8 animate-fade-in-up"
+      >
+        <div
+          v-for="card in tab.content"
+          :key="card.title"
+          class="flex-1 basis-[45%] bg-card border-2 border-highlight rounded-[10px] shadow-custom p-8"
+        >
+          <h2 class="text-primary text-xl font-semibold border-b-2 border-primary pb-2 mb-4">
+            {{ card.title }}
+          </h2>
+          <div v-html="card.body" class="space-y-2 text-fg"></div>
         </div>
-      </div>
-    </section>
+      </section>
+    </main>
 
-    <section id="tab2">
-      <div class="card"><h2>Cats</h2>
-        <p>Cats are the best animals...</p>
-      </div>
-    </section>
+    <footer class="bg-card text-secondary text-center py-4 shadow-inner-custom">
+      Made in 2025 by Luca F
+    </footer>
+  </div>
 
-    <section id="tab3">
-      <div class="card"><h2>Tab 3</h2><p>This is example content for tab 3.</p></div>
-    </section>
+  <script src="https://unpkg.com/vue@3"></script>
+  <script>
+    const { createApp } = Vue;
 
-    <section id="tab4">
-      <div class="card"><h2>Tab 4</h2><p>This is example content for tab 4.</p></div>
-    </section>
+    createApp({
+      data() {
+        return {
+          currentTab: 'tab1',
+          tabs: [
+            {
+              id: 'tab1',
+              label: 'About Me',
+              content: [
+                {
+                  title: 'About Me',
+                  body: 'Hello, I am Luca, and this is my website.'
+                },
+                {
+                  title: 'Find Me Online',
+                  body: `
+                    <p><strong>Roblox:</strong> codyferd</p>
+                    <p><strong>GitHub:</strong> codyferd</p>
+                    <p><strong>TikTok:</strong> @polycat.codyferd</p>
+                    <p><strong>YouTube:</strong> polycat.codyferd</p>
+                    <p><strong>Mastodon:</strong> codyferd@mastodon.social</p>
+                    <p><strong>Snapchat:</strong> polycatcodyferd</p>
+                    <p><strong>Discord:</strong> codyferd_81690</p>
+                    <p><strong>PeerTube:</strong> polycat@video.sadmin.io</p>
+                  `
+                }
+              ]
+            },
+            {
+              id: 'tab2',
+              label: 'Cats',
+              content: [
+                {
+                  title: 'Cats',
+                  body: 'Cats are the best animals...'
+                }
+              ]
+            }
+          ]
+        };
+      },
+      methods: {
+        selectTab(tabId) {
+          this.currentTab = tabId;
+        }
+      },
+      mounted() {
 
-    <section id="tab5">
-      <div class="card"><h2>Tab 5</h2><p>This is example content for tab 5.</p></div>
-    </section>
-
-    <section id="tab6">
-      <div class="card"><h2>Tab 6</h2><p>This is example content for tab 6.</p></div>
-    </section>
-  </main>
-
-  <footer>
-    Made in 2025 by Luca F
-  </footer>
-
-  <script src="script.js"></script>
+        this.selectTab(this.currentTab);
+      }
+    }).mount('#app');
+  </script>
 </body>
 </html>
