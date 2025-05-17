@@ -29,16 +29,13 @@
             }
           },
           animation: {
-            'fade-in-up': 'fade-in-up 0.6s ease forwards',
+            'fade-in-up': 'fade-in-up 0.5s ease forwards',
           }
         }
       }
     }
   </script>
 
-  <style>
-    [v-cloak] { display: none; }
-  </style>
 </head>
 <body class="bg-bg text-fg font-sans min-h-screen flex flex-col">
 
@@ -128,7 +125,10 @@
               content: [
                 {
                   title: 'Cats',
-                  body: 'Cats are the best animals...'
+                  body: `
+                    <p>Cats are the best animals...<p>
+                    <img src="img/cats.avif">
+                  `
                 }
               ]
             }
