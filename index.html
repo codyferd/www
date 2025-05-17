@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Luca's Website</title>
-
+  <link rel="icon" type="image/svg" href="assets/icon.ico"/>
   <script src="lib/tailwind.js"></script>
   <script>
     tailwind.config = {
@@ -21,28 +21,43 @@
           boxShadow: {
             custom: '0 4px 12px rgba(0,0,0,0.1)',
             'inner-custom': '0 -2px 8px rgba(0,0,0,0.1)',
+            glow: '0 0 15px #cba6f7'
           },
           keyframes: {
             'fade-in-up': {
               '0%': { opacity: '0', transform: 'translateY(20px)' },
               '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            'glow': {
+              '0%, 100%': { textShadow: '0 0 5px #cba6f7' },
+              '50%': { textShadow: '0 0 15px #cba6f7' },
+            },
+            'pulse-border': {
+              '0%, 100%': { borderColor: 'transparent' },
+              '50%': { borderColor: '#cba6f7' },
+            },
+            'zoom-in': {
+              '0%': { transform: 'scale(0.9)', opacity: 0 },
+              '100%': { transform: 'scale(1)', opacity: 1 },
             }
           },
           animation: {
-            'fade-in-up': 'fade-in-up 0.5s ease forwards',
+            'fade-in-up': 'fade-in-up 0.6s ease forwards',
+            'glow-text': 'glow 2s ease-in-out infinite',
+            'pulse-border': 'pulse-border 1.5s ease-in-out infinite',
+            'zoom-in': 'zoom-in 0.4s ease-out forwards'
           }
         }
       }
     }
   </script>
-
 </head>
 <body class="bg-bg text-fg font-sans min-h-screen flex flex-col">
 
   <div id="app" class="flex flex-col flex-1">
 
     <header class="bg-bg text-white text-center py-8 shadow-custom">
-      <h1 class="text-3xl font-bold">Luca’s Website</h1>
+      <h1 class="text-3xl font-bold animate-glow-text">Luca’s Website</h1>
     </header>
 
     <nav class="flex flex-wrap justify-center bg-card shadow-custom">
@@ -54,7 +69,7 @@
         :class="[
           'bg-transparent border-none text-secondary text-base py-4 px-6 cursor-pointer border-b-4 transition-colors duration-300',
           currentTab === tab.id
-            ? 'text-primary border-primary font-bold'
+            ? 'text-primary border-primary font-bold animate-pulse-border'
             : 'border-transparent hover:text-primary'
         ]"
       >
@@ -67,12 +82,12 @@
         v-for="tab in tabs"
         :key="tab.id"
         v-show="currentTab === tab.id"
-        class="flex flex-wrap gap-8 animate-fade-in-up"
+        class="flex flex-wrap gap-8 animate-fade-in-up transition-all duration-700"
       >
         <div
           v-for="card in tab.content"
           :key="card.title"
-          class="flex-1 basis-[45%] bg-card border-2 border-highlight rounded-[10px] shadow-custom p-8"
+          class="flex-1 basis-[45%] bg-card border-2 border-highlight rounded-[10px] shadow-custom p-8 hover:shadow-glow transform hover:scale-[1.02] transition duration-300 animate-zoom-in"
         >
           <h2 class="text-primary text-xl font-semibold border-b-2 border-primary pb-2 mb-4">
             {{ card.title }}
@@ -82,7 +97,7 @@
       </section>
     </main>
 
-    <footer class="bg-card text-secondary text-center py-4 shadow-inner-custom">
+    <footer class="bg-card text-secondary text-center py-4 shadow-inner-custom animate-fade-in-up">
       Made in 2025 by Luca F
     </footer>
   </div>
@@ -126,8 +141,8 @@
                 {
                   title: 'Cats',
                   body: `
-                    <p>Cats are the best animals...<p>
-                    <img src="img/cats.avif">
+                    <p>Cats are the best animals.</p>
+                    <img src="assets/cats.avif" class="rounded-md shadow-custom max-w-full mt-2">
                   `
                 }
               ]
@@ -141,7 +156,6 @@
         }
       },
       mounted() {
-
         this.selectTab(this.currentTab);
       }
     }).mount('#app');
