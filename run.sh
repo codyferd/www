@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-cd www/
+cd ~/www/
 FILE="index.html"
 if command -v xdg-open >/dev/null; then
   xdg-open "$FILE"

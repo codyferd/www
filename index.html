@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Luca's Website</title>
-  <link rel="icon" type="image/svg" href="assets/icon.svg"/>
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg"/>
+
+  <!-- Tailwind via CDN + custom theme -->
   <script src="lib/tailwind.js"></script>
   <script>
     tailwind.config = {
@@ -51,57 +53,62 @@
       }
     }
   </script>
+  <style>
+    [v-cloak] { display: none; }
+  </style>
 </head>
 <body class="bg-bg text-fg font-sans min-h-screen flex flex-col">
 
   <div id="app" class="flex flex-col flex-1">
 
+    <!-- HEADER -->
     <header class="bg-bg text-white text-center py-8 shadow-custom">
       <h1 class="text-3xl font-bold animate-glow-text">Luca’s Website</h1>
     </header>
 
-    <nav class="flex flex-wrap justify-center bg-card shadow-custom">
+    <!-- NAVIGATION TABS -->
+    <nav class="flex justify-center bg-card shadow-custom">
       <button
         v-for="tab in tabs"
         :key="tab.id"
         @click="selectTab(tab.id)"
         v-cloak
         :class="[
-          'bg-transparent border-none text-secondary text-base py-4 px-6 cursor-pointer border-b-4 transition-colors duration-300',
+          'px-6 py-4 text-base font-medium border-b-4 transition-colors duration-300',
           currentTab === tab.id
-            ? 'text-primary border-primary font-bold animate-pulse-border'
-            : 'border-transparent hover:text-primary'
+            ? 'text-primary border-primary animate-pulse-border'
+            : 'text-secondary border-transparent hover:text-primary'
         ]"
       >
         {{ tab.label }}
       </button>
     </nav>
 
-    <main class="flex-1 max-w-[1000px] mx-auto my-8 px-4 flex flex-col gap-8">
-      <section
-        v-for="tab in tabs"
-        :key="tab.id"
-        v-show="currentTab === tab.id"
-        class="flex flex-wrap gap-8 animate-fade-in-up transition-all duration-700"
-      >
-        <div
-          v-for="card in tab.content"
-          :key="card.title"
-          class="flex-1 basis-[45%] bg-card border-2 border-highlight rounded-[10px] shadow-custom p-8 hover:shadow-glow transform hover:scale-[1.02] transition duration-300 animate-zoom-in"
-        >
-          <h2 class="text-primary text-xl font-semibold border-b-2 border-primary pb-2 mb-4">
-            {{ card.title }}
-          </h2>
-          <div v-html="card.body" class="space-y-2 text-fg"></div>
-        </div>
-      </section>
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 max-w-3xl mx-auto my-8 px-4 space-y-8">
+      <template v-for="tab in tabs" :key="tab.id">
+        <section v-show="currentTab === tab.id" class="space-y-6" v-cloak>
+          <div
+            v-for="card in tab.content"
+            :key="card.title"
+            class="bg-card border-2 border-highlight rounded-lg shadow-custom p-8 hover:shadow-glow hover:scale-[1.02] transition duration-300 animate-zoom-in"
+          >
+            <h2 class="text-xl font-semibold text-primary border-b-2 border-primary pb-2 mb-4">
+              {{ card.title }}
+            </h2>
+            <div class="prose prose-invert" v-html="card.body"></div>
+          </div>
+        </section>
+      </template>
     </main>
 
+    <!-- FOOTER -->
     <footer class="bg-card text-secondary text-center py-4 shadow-inner-custom animate-fade-in-up">
       Made in 2025 by Luca F
     </footer>
   </div>
 
+  <!-- Vue.js CDN -->
   <script src="lib/vue.js"></script>
   <script>
     const { createApp } = Vue;
@@ -109,40 +116,51 @@
     createApp({
       data() {
         return {
-          currentTab: 'tab1',
+          currentTab: 'about',
           tabs: [
             {
-              id: 'tab1',
+              id: 'about',
               label: 'About Me',
               content: [
                 {
                   title: 'About Me',
-                  body: 'Hello, I am Luca, and this is my website.'
-                },
-                {
-                  title: 'Find Me Online',
                   body: `
-                    <p><strong>Roblox:</strong> codyferd</p>
-                    <p><strong>GitHub:</strong> codyferd</p>
-                    <p><strong>TikTok:</strong> @polycat.codyferd</p>
-                    <p><strong>YouTube:</strong> polycat.codyferd</p>
-                    <p><strong>Mastodon:</strong> codyferd@mastodon.social</p>
-                    <p><strong>Snapchat:</strong> polycatcodyferd</p>
-                    <p><strong>Discord:</strong> codyferd_81690</p>
-                    <p><strong>PeerTube:</strong> polycat@video.sadmin.io</p>
+                    <p>I'm <strong>Luca</strong>, a front-end developer who loves developing
+                    modern, responsive web interfaces. When I’m not coding, you’ll find
+                    me gaming or being goated.</p>
                   `
                 }
               ]
             },
             {
-              id: 'tab2',
+              id: 'find',
+              label: 'Find Me Online',
+              content: [
+                {
+                  title: 'Find Me Online',
+                  body: `
+                    <ul class="list-disc list-inside space-y-1">
+                      <p><a href="https://www.roblox.com/users/567220975/profile"><strong>Roblox:</strong> codyferd</a></p>
+                      <p><a href="https://github.com/codyferd"><strong>GitHub:</strong> codyferd</a></p>
+                      <p><a href="https://www.tiktok.com/@polycat.codyferd"><strong>TikTok:</strong> @polycat.codyferd</a></p>
+                      <p><a href="https://www.youtube.com/@Polycat.Codyferd"><strong>YouTube:</strong> polycat.codyferd</a></p>
+                      <p><a href="https://mastodon.social/@codyferd"><strong>Mastodon:</strong> codyferd@mastodon.social</a></p>
+                      <p><strong>Snapchat:</strong> polycatcodyferd</p>
+                      <p><strong>Discord:</strong> codyferd_81690</p>
+                    </ul>
+                  `
+                }
+              ]
+            },
+            {
+              id: 'cats',
               label: 'Cats',
               content: [
                 {
-                  title: 'Cats',
+                  title: 'Why Cats?',
                   body: `
-                    <p>Cats are the best animals.</p>
-                    <img src="assets/cats.png" class="rounded-md shadow-custom max-w-full mt-2">
+                    <p>Cats are the best animals...</p>
+                    <img src="assets/cats.png" alt="Cute cats" class="rounded-md shadow-custom max-w-full mt-4"/>
                   `
                 }
               ]
@@ -151,11 +169,12 @@
         };
       },
       methods: {
-        selectTab(tabId) {
-          this.currentTab = tabId;
+        selectTab(id) {
+          this.currentTab = id;
         }
       },
       mounted() {
+        // ensure the default tab is visible
         this.selectTab(this.currentTab);
       }
     }).mount('#app');
