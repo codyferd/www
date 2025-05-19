@@ -82,8 +82,6 @@
           {{ tab.label }}
         </button>
       </nav>
-
-      <!-- MAIN CONTENT -->
       <main class="flex-1 max-w-3xl mx-auto my-8 px-4 space-y-8">
         <template v-for="tab in tabs" :key="tab.id">
           <section v-show="currentTab === tab.id" class="space-y-6" v-cloak>
@@ -103,7 +101,6 @@
         </template>
       </main>
 
-      <!-- FOOTER -->
       <footer
         class="bg-card text-secondary text-center py-4 shadow-inner-custom animate-fade-in-up"
       >
@@ -111,7 +108,6 @@
       </footer>
     </div>
 
-    <!-- Vue.js CDN -->
     <script src="lib/vue.js"></script>
     <script>
       const { createApp } = Vue;
@@ -176,7 +172,6 @@
           },
         },
         mounted() {
-          // ensure the default tab is visible
           this.selectTab(this.currentTab);
         },
       }).mount("#app");
