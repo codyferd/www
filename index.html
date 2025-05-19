@@ -1,144 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Luca's Website</title>
-  <link rel="icon" type="image/svg+xml" href="assets/icon.svg"/>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luca's Website</title>
+    <link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
 
-  <!-- Tailwind via CDN + custom theme -->
-  <script src="lib/tailwind.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            bg: '#1e1e1e',
-            fg: '#cdd6f4',
-            primary: '#cba6f7',
-            secondary: '#a6adc8',
-            card: '#2e2e2e',
-            highlight: '#45475a',
-          },
-          boxShadow: {
-            custom: '0 4px 12px rgba(0,0,0,0.1)',
-            'inner-custom': '0 -2px 8px rgba(0,0,0,0.1)',
-            glow: '0 0 15px #cba6f7'
-          },
-          keyframes: {
-            'fade-in-up': {
-              '0%': { opacity: '0', transform: 'translateY(20px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
+    <script src="lib/tailwind.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              bg: "#1e1e1e",
+              fg: "#cdd6f4",
+              primary: "#cba6f7",
+              secondary: "#a6adc8",
+              card: "#2e2e2e",
+              highlight: "#45475a",
             },
-            'glow': {
-              '0%, 100%': { textShadow: '0 0 5px #cba6f7' },
-              '50%': { textShadow: '0 0 15px #cba6f7' },
+            boxShadow: {
+              custom: "0 4px 12px rgba(0,0,0,0.1)",
+              "inner-custom": "0 -2px 8px rgba(0,0,0,0.1)",
+              glow: "0 0 15px #cba6f7",
             },
-            'pulse-border': {
-              '0%, 100%': { borderColor: 'transparent' },
-              '50%': { borderColor: '#cba6f7' },
+            keyframes: {
+              "fade-in-up": {
+                "0%": { opacity: "0", transform: "translateY(20px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
+              glow: {
+                "0%, 100%": { textShadow: "0 0 5px #cba6f7" },
+                "50%": { textShadow: "0 0 15px #cba6f7" },
+              },
+              "pulse-border": {
+                "0%, 100%": { borderColor: "transparent" },
+                "50%": { borderColor: "#cba6f7" },
+              },
+              "zoom-in": {
+                "0%": { transform: "scale(0.9)", opacity: 0 },
+                "100%": { transform: "scale(1)", opacity: 1 },
+              },
             },
-            'zoom-in': {
-              '0%': { transform: 'scale(0.9)', opacity: 0 },
-              '100%': { transform: 'scale(1)', opacity: 1 },
-            }
+            animation: {
+              "fade-in-up": "fade-in-up 0.6s ease forwards",
+              "glow-text": "glow 2s ease-in-out infinite",
+              "pulse-border": "pulse-border 1.5s ease-in-out infinite",
+              "zoom-in": "zoom-in 0.4s ease-out forwards",
+            },
           },
-          animation: {
-            'fade-in-up': 'fade-in-up 0.6s ease forwards',
-            'glow-text': 'glow 2s ease-in-out infinite',
-            'pulse-border': 'pulse-border 1.5s ease-in-out infinite',
-            'zoom-in': 'zoom-in 0.4s ease-out forwards'
-          }
-        }
+        },
+      };
+    </script>
+    <style>
+      [v-cloak] {
+        display: none;
       }
-    }
-  </script>
-  <style>
-    [v-cloak] { display: none; }
-  </style>
-</head>
-<body class="bg-bg text-fg font-sans min-h-screen flex flex-col">
+    </style>
+  </head>
+  <body class="bg-bg text-fg font-sans min-h-screen flex flex-col">
+    <div id="app" class="flex flex-col flex-1">
+      <!-- HEADER -->
+      <header class="bg-bg text-white text-center py-8 shadow-custom">
+        <h1 class="text-3xl font-bold animate-glow-text">Luca’s Website</h1>
+      </header>
 
-  <div id="app" class="flex flex-col flex-1">
-
-    <!-- HEADER -->
-    <header class="bg-bg text-white text-center py-8 shadow-custom">
-      <h1 class="text-3xl font-bold animate-glow-text">Luca’s Website</h1>
-    </header>
-
-    <!-- NAVIGATION TABS -->
-    <nav class="flex justify-center bg-card shadow-custom">
-      <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        @click="selectTab(tab.id)"
-        v-cloak
-        :class="[
+      <!-- NAVIGATION TABS -->
+      <nav class="flex justify-center bg-card shadow-custom">
+        <button
+          v-for="tab in tabs"
+          :key="tab.id"
+          @click="selectTab(tab.id)"
+          v-cloak
+          :class="[
           'px-6 py-4 text-base font-medium border-b-4 transition-colors duration-300',
           currentTab === tab.id
             ? 'text-primary border-primary animate-pulse-border'
             : 'text-secondary border-transparent hover:text-primary'
         ]"
+        >
+          {{ tab.label }}
+        </button>
+      </nav>
+
+      <!-- MAIN CONTENT -->
+      <main class="flex-1 max-w-3xl mx-auto my-8 px-4 space-y-8">
+        <template v-for="tab in tabs" :key="tab.id">
+          <section v-show="currentTab === tab.id" class="space-y-6" v-cloak>
+            <div
+              v-for="card in tab.content"
+              :key="card.title"
+              class="bg-card border-2 border-highlight rounded-lg shadow-custom p-8 hover:shadow-glow hover:scale-[1.02] transition duration-300 animate-zoom-in"
+            >
+              <h2
+                class="text-xl font-semibold text-primary border-b-2 border-primary pb-2 mb-4"
+              >
+                {{ card.title }}
+              </h2>
+              <div class="prose prose-invert" v-html="card.body"></div>
+            </div>
+          </section>
+        </template>
+      </main>
+
+      <!-- FOOTER -->
+      <footer
+        class="bg-card text-secondary text-center py-4 shadow-inner-custom animate-fade-in-up"
       >
-        {{ tab.label }}
-      </button>
-    </nav>
+        Made in 2025 by Luca F
+      </footer>
+    </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 max-w-3xl mx-auto my-8 px-4 space-y-8">
-      <template v-for="tab in tabs" :key="tab.id">
-        <section v-show="currentTab === tab.id" class="space-y-6" v-cloak>
-          <div
-            v-for="card in tab.content"
-            :key="card.title"
-            class="bg-card border-2 border-highlight rounded-lg shadow-custom p-8 hover:shadow-glow hover:scale-[1.02] transition duration-300 animate-zoom-in"
-          >
-            <h2 class="text-xl font-semibold text-primary border-b-2 border-primary pb-2 mb-4">
-              {{ card.title }}
-            </h2>
-            <div class="prose prose-invert" v-html="card.body"></div>
-          </div>
-        </section>
-      </template>
-    </main>
+    <!-- Vue.js CDN -->
+    <script src="lib/vue.js"></script>
+    <script>
+      const { createApp } = Vue;
 
-    <!-- FOOTER -->
-    <footer class="bg-card text-secondary text-center py-4 shadow-inner-custom animate-fade-in-up">
-      Made in 2025 by Luca F
-    </footer>
-  </div>
-
-  <!-- Vue.js CDN -->
-  <script src="lib/vue.js"></script>
-  <script>
-    const { createApp } = Vue;
-
-    createApp({
-      data() {
-        return {
-          currentTab: 'about',
-          tabs: [
-            {
-              id: 'about',
-              label: 'About Me',
-              content: [
-                {
-                  title: 'About Me',
-                  body: `
+      createApp({
+        data() {
+          return {
+            currentTab: "about",
+            tabs: [
+              {
+                id: "about",
+                label: "About Me",
+                content: [
+                  {
+                    title: "About Me",
+                    body: `
                     <p>I'm <strong>Luca</strong>, a front-end developer who loves developing
-                    modern, responsive web interfaces. When I’m not coding, you’ll find
-                    me gaming or being goated.</p>
-                  `
-                }
-              ]
-            },
-            {
-              id: 'find',
-              label: 'Find Me Online',
-              content: [
-                {
-                  title: 'Find Me Online',
-                  body: `
+                    modern, responsive web interfaces.</p>
+                  `,
+                  },
+                ],
+              },
+              {
+                id: "find",
+                label: "Find Me Online",
+                content: [
+                  {
+                    title: "Find Me Online",
+                    body: `
                     <ul class="list-disc list-inside space-y-1">
                       <p><a href="https://www.roblox.com/users/567220975/profile"><strong>Roblox:</strong> codyferd</a></p>
                       <p><a href="https://github.com/codyferd"><strong>GitHub:</strong> codyferd</a></p>
@@ -148,36 +150,36 @@
                       <p><strong>Snapchat:</strong> polycatcodyferd</p>
                       <p><strong>Discord:</strong> codyferd_81690</p>
                     </ul>
-                  `
-                }
-              ]
-            },
-            {
-              id: 'cats',
-              label: 'Cats',
-              content: [
-                {
-                  title: 'Why Cats?',
-                  body: `
+                  `,
+                  },
+                ],
+              },
+              {
+                id: "cats",
+                label: "Cats",
+                content: [
+                  {
+                    title: "Cats",
+                    body: `
                     <p>Cats are the best animals...</p>
                     <img src="assets/cats.png" alt="Cute cats" class="rounded-md shadow-custom max-w-full mt-4"/>
-                  `
-                }
-              ]
-            }
-          ]
-        };
-      },
-      methods: {
-        selectTab(id) {
-          this.currentTab = id;
-        }
-      },
-      mounted() {
-        // ensure the default tab is visible
-        this.selectTab(this.currentTab);
-      }
-    }).mount('#app');
-  </script>
-</body>
+                  `,
+                  },
+                ],
+              },
+            ],
+          };
+        },
+        methods: {
+          selectTab(id) {
+            this.currentTab = id;
+          },
+        },
+        mounted() {
+          // ensure the default tab is visible
+          this.selectTab(this.currentTab);
+        },
+      }).mount("#app");
+    </script>
+  </body>
 </html>
