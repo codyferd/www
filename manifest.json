@@ -1,0 +1,9 @@
+{
+  "name": "www",
+  "version": "1.0.0",
+  "description": "My personal website",
+  "exec": "run.sh",
+  "icon": "assets/icon.svg",
+  "author": "Luca Ferdinand",
+  "license": "UPDL"
+}
