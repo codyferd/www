@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=www
+Exec=run.sh
+Icon=assets/icon.svg
+Comment=This is my personal website.
+Categories=Internet
+Terminal=false
