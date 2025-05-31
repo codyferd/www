@@ -1,0 +1,1 @@
+dsd exec ./run.sh
