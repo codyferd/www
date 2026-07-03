@@ -32,9 +32,11 @@ const appList = [
     { title: 'Recorder', icon: '🎥', path: '../recorder/index.html' },
     { title: 'Send', icon: '📥', path: '../send/index.html' },
     { title: 'Snake', icon: '🐍', path: '../snake/index.html' },
+    { title: 'Soundboard', icon: '🔊', path: '../soundboard/index.html' },
     { title: 'Spreadsheets', icon: '🧮', path: '../spreadsheets/index.html' },
     { title: 'Synthesizer', icon: '🎹', path: '../synthesizer/index.html' },
     { title: 'Tictactoe', icon: '🌀', path: '../tictactoe/index.html'},
     { title: 'Translate', icon: '🌐', path: '../translate/index.html' },
     { title: 'Weather', icon: '⛅', path: '../weather/index.html'},
 ];
+// { title: '', icon: '', path: '../?/index.html'},

@@ -137,7 +137,7 @@ createApp({
             return;
         } else {
             // Local app not found -> Treat as a search string query and fallback to the web tab engine
-            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&igu=1`;
             const id = Date.now();
             
             desktops.value.push({
