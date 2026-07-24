@@ -1,4 +1,0 @@
-[v-cloak] { display: none; }
-#msg-container::-webkit-scrollbar { width: 4px; }
-#msg-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-input:disabled { opacity: 0.5; }

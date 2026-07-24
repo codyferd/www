@@ -1,0 +1,65 @@
+[
+	{
+		"name": "GitHub",
+		"label": "codyferd",
+		"url": "https://github.com/codyferd",
+		"accent": "text-white/60"
+	},
+	{
+		"name": "YouTube",
+		"label": "polycat.codyferd",
+		"url": "https://www.youtube.com/@Polycat.Codyferd",
+		"accent": "text-red-400"
+	},
+	{
+		"name": "Mastodon",
+		"label": "codyferd@mastodon.social",
+		"url": "https://mastodon.social/@codyferd",
+		"accent": "text-purple-400"
+	},
+	{
+		"name": "Facebook",
+		"label": "Luca Ferdinand",
+		"url": "https://www.facebook.com/profile.php?id=61555933292391",
+		"accent": "text-blue-500"
+	},
+	{
+		"name": "Instagram",
+		"label": "kodyferd",
+		"url": "https://www.instagram.com/kodyferd/",
+		"accent": "text-pink-400"
+	},
+	{
+		"name": "Threads",
+		"label": "kodyferd",
+		"url": "https://www.threads.com/@kodyferd",
+		"accent": "text-zinc-200"
+	},
+	{
+		"name": "Reddit",
+		"label": "Ornery_Present2560",
+		"url": "https://www.reddit.com/user/Ornery_Present2560/",
+		"accent": "text-orange-400"
+	},
+	{
+		"name": "LinkedIn",
+		"label": "Luca Ferdinand",
+		"url": "https://www.linkedin.com/in/luca-ferdinand-509918423/",
+		"accent": "text-blue-400"
+	},
+	{
+		"name": "Discord",
+		"label": "codyferd_81960",
+		"accent": "text-[#9999FF]"
+	},
+	{
+		"name": "Snapchat",
+		"label": "codyferdpolycat",
+		"accent": "text-yellow-400"
+	},
+	{
+		"name": "Email",
+		"label": "lucarappferdinand@gmail.com",
+		"accent": "text-emerald-400"
+	}
+]
