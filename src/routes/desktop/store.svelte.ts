@@ -57,12 +57,15 @@ export const DesktopEngine = $state({
 
 	launchNewDesktop(app: (typeof appListData)[0]) {
 		const id = Date.now();
+		// Normalize path if it starts with relative dots like "../"
+		const cleanPath = app.path.replace(/^\.\.\//, '/');
+
 		this.desktops.push({
 			id,
 			name: app.title,
 			splitRatioX: 50,
 			splitRatioY: 50,
-			apps: [{ ...app, instanceId: id }]
+			apps: [{ ...app, path: cleanPath, instanceId: id }]
 		});
 		this.activeDesktopId = id;
 		this.focusedAppId = id;

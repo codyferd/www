@@ -11,6 +11,8 @@
 	let activeResizingDesktop = $state<DesktopTab | null>(null);
 	let resizeDirection = $state<'X' | 'Y' | 'BOTH'>('X');
 
+	import { base } from '$app/paths';
+
 	let startX = 0;
 	let startY = 0;
 	let containerWidth = 0;
@@ -168,7 +170,9 @@
 						<div class="relative h-full w-full flex-1 bg-white">
 							<iframe
 								id="frame-{app.instanceId}"
-								src={app.path}
+								src={app.path.startsWith('http') || app.path.startsWith('blob:')
+									? app.path
+									: `${base}${app.path}`}
 								title={app.title}
 								class="h-full w-full border-none bg-white {activeResizingDesktop
 									? 'pointer-events-none'
