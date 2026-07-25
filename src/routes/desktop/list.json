@@ -14,7 +14,7 @@
 	{ "title": "Fetch", "icon": "ℹ️", "path": "/fetch" },
 	{ "title": "Files", "icon": "📁", "path": "/files" },
 	{ "title": "Gallery", "icon": "🖼️", "path": "/gallery" },
-	{ "title": "Gamemaker", "icon": "🎮", "path": "/gamemaker" },
+	{ "title": "Games", "icon": "🎮", "path": "/games" },
 	{ "title": "Hop", "icon": "🦘", "path": "/hop" },
 	{ "title": "Jump", "icon": "⏫", "path": "/jump" },
 	{ "title": "Links", "icon": "🔗", "path": "/links" },

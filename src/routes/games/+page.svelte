@@ -13,7 +13,14 @@
 
 	interface SpritePlacement {
 		id: string;
-		position: 'left' | 'center' | 'right';
+		position:
+			| 'left'
+			| 'left-center'
+			| 'center-left'
+			| 'center'
+			| 'center-right'
+			| 'right-center'
+			| 'right';
 	}
 
 	interface ScriptNode {
@@ -252,7 +259,7 @@
 					lastRenderedText = '';
 					isMenuOpen = false;
 				} else {
-					alert('Invalid Avero Gamemaker JSON format.');
+					alert('Invalid Avero Games JSON format.');
 				}
 			} catch {
 				alert('Error reading script JSON file.');
@@ -293,7 +300,7 @@
 </script>
 
 <svelte:head>
-	<title>Avero Gamemaker Engine</title>
+	<title>Avero Games</title>
 </svelte:head>
 
 <!-- Main Stage Container -->
@@ -513,7 +520,7 @@
 			>
 				<div class="flex items-center justify-between border-b border-white/10 p-3 md:p-4">
 					<h3 class="text-sm font-bold tracking-wider text-[#9999FF] uppercase md:text-base">
-						📖 Gamemaker Documentation
+						📖 Avero Games Documentation
 					</h3>
 					<button
 						onclick={() => (isDocsOpen = false)}
@@ -571,7 +578,11 @@
 					<div
 						class="absolute bottom-16 flex h-48 w-32 items-end justify-center transition-all duration-500 sm:h-64 sm:w-44 md:bottom-28 md:h-96 md:w-64 landscape:bottom-12 landscape:h-56 landscape:w-40
 						{placement.position === 'left' ? 'left-2 sm:left-4 landscape:left-8' : ''}
+						{placement.position === 'left-center' ? 'left-[16%] -translate-x-1/2' : ''}
+						{placement.position === 'center-left' ? 'left-[33%] -translate-x-1/2' : ''}
 						{placement.position === 'center' ? 'left-1/2 -translate-x-1/2' : ''}
+						{placement.position === 'center-right' ? 'left-[66%] -translate-x-1/2' : ''}
+						{placement.position === 'right-center' ? 'left-[83%] -translate-x-1/2' : ''}
 						{placement.position === 'right' ? 'right-2 sm:right-4 landscape:right-8' : ''}"
 					>
 						<img
