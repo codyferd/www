@@ -1,10 +1,10 @@
-# Avero Gamemaker Engine Scripting Guide
+# Avero Games Engine Scripting Guide
 
-This tutorial explains how to author narrative scripts and structure project files for the Avero Gamemaker Engine.
+This tutorial explains how to author narrative scripts and structure project files for the Avero Games Engine.
 
 ## 1. File Format & High-Level Architecture
 
-All stories in Avero Gamemaker are written as standard **JSON documents**. Your JSON file acts as a single package containing two main parts:
+All stories in Avero Games are written as standard **JSON documents**. Your JSON file acts as a single package containing two main parts:
 
 1.  **Asset Registries:** Dictionaries mapping simple string identifiers to asset URLs or local paths for media (backgrounds, videos, character sprites, background music, and sound effects).
 2.  **Character Registry:** A dictionary defining participant profiles.
@@ -66,7 +66,7 @@ The engine dynamically formats markdown syntax inside your text strings without 
 
 ## 6. Testing & Loading Your Story
 
-1.  Launch the Avero Gamemaker Engine interface.
+1.  Launch the Avero Games Engine interface.
 2.  Open the **Avero Menu** in the top header.
 3.  Click **Load JSON File** and select your saved JSON script.
 4.  Use the **Script Node Jump** input in the menu to jump directly to specific node numbers for rapid testing during script development.

@@ -14,13 +14,7 @@
 	interface SpritePlacement {
 		id: string;
 		position:
-			| 'left'
-			| 'left-center'
-			| 'center-left'
-			| 'center'
-			| 'center-right'
-			| 'right-center'
-			| 'right';
+			'left' | 'left-center' | 'center-left' | 'center' | 'center-right' | 'right-center' | 'right';
 	}
 
 	interface ScriptNode {
@@ -92,6 +86,16 @@
 			? gameData.videos[currentNode.video]
 			: ''
 	);
+
+	// Dynamic Sprite Sizing Calculations (Percentage based on total sprites)
+	let activeSprites = $derived(currentNode?.sprites || []);
+	let spriteCount = $derived(activeSprites.length);
+
+	let dynamicSpriteStyle = $derived.by(() => {
+		if (spriteCount <= 2) return 'height: 60%; max-width: 25%;';
+		if (spriteCount <= 4) return 'height: 50%; max-width: 20%;';
+		return 'height: 42%; max-width: 15%;';
+	});
 
 	function parseMarkdownTokens(str: string): TextToken[] {
 		if (!str) return [];
@@ -303,353 +307,366 @@
 	<title>Avero Games</title>
 </svelte:head>
 
-<!-- Main Stage Container -->
+<!-- Viewport Outer Bounds (Forces dynamic 100dvh to eliminate browser toolbar jumping) -->
 <div
-	role="button"
-	tabindex="0"
-	onclick={advanceNode}
-	onkeydown={handleKeyDown}
-	class="relative flex h-dvh w-full flex-col justify-between overflow-hidden bg-black font-sans text-white select-none focus:outline-none"
+	class="h-dvh00dvw] fixed inset-0 flex items-center justify-center overflow-hidden bg-black font-sans text-white select-none"
 >
-	<!-- Video Layer -->
-	{#if videoUrl}
-		<video
-			src={videoUrl}
-			autoplay
-			loop
-			muted
-			playsinline
-			class="absolute inset-0 h-full w-full object-cover"
-		></video>
-	{:else if backgroundUrl}
-		<div
-			class="absolute inset-0 bg-cover bg-center transition-all duration-700"
-			style="background-image: url('{backgroundUrl}');"
-		></div>
-	{/if}
-
-	<!-- Vignette Overlay -->
-	<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
-
-	<!-- Audio Unlock Prompt Banner -->
-	{#if !audioUnlocked}
-		<div
-			class="absolute top-16 left-1/2 z-40 -translate-x-1/2 rounded-full border border-[#9999FF]/40 bg-black/80 px-4 py-1.5 text-xs font-semibold text-[#9999FF] shadow-lg backdrop-blur-md"
-		>
-			🔊 Tap anywhere or press Space for audio
-		</div>
-	{/if}
-
-	<!-- Top Menu Header -->
-	<header class="relative z-30 mt-20 flex items-center justify-between p-3 md:p-6 landscape:p-2">
-		<div class="relative">
-			<!-- Menu Toggle Button (☰ Icon only) -->
-			<button
-				aria-label="Toggle Menu"
-				onclick={(e) => {
-					e.stopPropagation();
-					isMenuOpen = !isMenuOpen;
-				}}
-				class="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/15 bg-black/60 text-lg font-bold backdrop-blur-md transition hover:border-[#9999FF] active:scale-95"
-			>
-				☰
-			</button>
-
-			<!-- Menu Dropdown Container -->
-			{#if isMenuOpen}
-				<!-- Backdrop to close dropdown on outside tap for mobile -->
-				<div
-					role="none"
-					class="fixed inset-0 z-40 bg-transparent"
-					onclick={(e) => {
-						e.stopPropagation();
-						isMenuOpen = false;
-					}}
-				></div>
-
-				<div
-					role="none"
-					onclick={(e) => e.stopPropagation()}
-					class="absolute top-12 left-0 z-50 max-h-[80vh] w-[calc(100vw-2rem)] max-w-xs space-y-4 overflow-y-auto rounded-2xl border border-white/15 bg-black/95 p-4 shadow-2xl backdrop-blur-xl sm:w-80"
-				>
-					<div>
-						<span class="text-[10px] font-black tracking-widest text-white/40 uppercase"
-							>Script Source</span
-						>
-						<div class="mt-2 flex gap-2">
-							<input
-								type="file"
-								accept=".json"
-								bind:this={fileInputRef}
-								onchange={handleFileUpload}
-								class="hidden"
-							/>
-							<button
-								onclick={() => fileInputRef?.click()}
-								class="w-full rounded-xl border border-white/10 bg-white/5 py-2 text-xs font-bold tracking-wider text-white uppercase hover:border-[#9999FF] hover:bg-[#9999FF]/10 active:scale-95"
-							>
-								Load JSON File
-							</button>
-							<button
-								onclick={loadDefaultScript}
-								class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white/70 hover:bg-white/10 active:scale-95"
-							>
-								Reset
-							</button>
-						</div>
-					</div>
-
-					<!-- Audio Mute Toggles -->
-					<div class="border-t border-white/10 pt-3">
-						<span class="text-[10px] font-black tracking-widest text-white/40 uppercase"
-							>Audio Settings</span
-						>
-						<div class="mt-2 grid grid-cols-2 gap-2">
-							<button
-								onclick={() => (isMusicMuted = !isMusicMuted)}
-								class="rounded-xl border p-2 text-xs font-bold uppercase transition active:scale-95 {isMusicMuted
-									? 'border-red-500/50 bg-red-500/10 text-red-400'
-									: 'border-white/10 bg-white/5 text-white/80'}"
-							>
-								Music: {isMusicMuted ? 'Muted' : 'ON'}
-							</button>
-							<button
-								onclick={() => (isSfxMuted = !isSfxMuted)}
-								class="rounded-xl border p-2 text-xs font-bold uppercase transition active:scale-95 {isSfxMuted
-									? 'border-red-500/50 bg-red-500/10 text-red-400'
-									: 'border-white/10 bg-white/5 text-white/80'}"
-							>
-								SFX: {isSfxMuted ? 'Muted' : 'ON'}
-							</button>
-						</div>
-					</div>
-
-					<!-- Auto Play Controls -->
-					<div class="border-t border-white/10 pt-3">
-						<span class="text-[10px] font-black tracking-widest text-white/40 uppercase"
-							>Playback Controls</span
-						>
-						<div class="mt-2 flex items-center justify-between">
-							<span class="text-xs font-medium text-white/80">Auto Play</span>
-							<button
-								onclick={toggleAutoPlay}
-								class="rounded-xl border px-3 py-1 text-xs font-bold uppercase backdrop-blur-md transition active:scale-95 {isAutoPlay
-									? 'border-emerald-500 bg-emerald-500/20 text-emerald-300'
-									: 'border-white/15 bg-white/5 text-white/70'}"
-							>
-								{isAutoPlay ? 'ON' : 'OFF'}
-							</button>
-						</div>
-						<div class="mt-3 space-y-2">
-							<label class="block text-[11px] text-white/60">
-								Typewriter Speed: <strong class="text-white">{textSpeed}ms</strong>
-								<input
-									type="range"
-									min="0"
-									max="100"
-									bind:value={textSpeed}
-									class="w-full accent-[#9999FF]"
-								/>
-							</label>
-							<label class="block text-[11px] text-white/60">
-								Auto Delay: <strong class="text-white">{autoDelay}ms</strong>
-								<input
-									type="range"
-									min="1000"
-									max="10000"
-									step="200"
-									bind:value={autoDelay}
-									class="w-full accent-[#9999FF]"
-								/>
-							</label>
-						</div>
-					</div>
-
-					<!-- Script Node Jump -->
-					<div class="border-t border-white/10 pt-3">
-						<span class="text-[10px] font-black tracking-widest text-white/40 uppercase"
-							>Script Node Jump</span
-						>
-						<p class="mt-1 text-[11px] text-white/60">
-							Current Node: <strong class="text-[#9999FF]">{currentIndex + 1}</strong>
-						</p>
-						<div class="mt-2 flex gap-2">
-							<input
-								type="number"
-								placeholder="Node #"
-								bind:value={saveCodeInput}
-								min="1"
-								max={gameData.script.length}
-								class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-white focus:border-[#9999FF] focus:outline-none"
-							/>
-							<button
-								onclick={loadFromSaveCode}
-								class="rounded-xl border border-emerald-500/30 bg-emerald-500/20 px-3 py-1.5 text-xs font-bold text-emerald-300 uppercase hover:bg-emerald-500/30 active:scale-95"
-							>
-								Jump
-							</button>
-						</div>
-					</div>
-
-					<!-- Documentation Button -->
-					<div class="border-t border-white/10 pt-3">
-						<button
-							onclick={() => {
-								isDocsOpen = true;
-								isMenuOpen = false;
-							}}
-							class="w-full rounded-xl border border-[#9999FF]/40 bg-[#9999FF]/10 py-2.5 text-xs font-bold tracking-wider text-[#9999FF] uppercase transition hover:bg-[#9999FF]/20 active:scale-95"
-						>
-							📖 View Documentation
-						</button>
-					</div>
-				</div>
-			{/if}
-		</div>
-	</header>
-
-	<!-- Documentation Modal -->
-	{#if isDocsOpen}
-		<div
-			role="none"
-			onclick={(e) => e.stopPropagation()}
-			class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-md md:p-6"
-		>
-			<div
-				class="flex h-full max-h-[90dvh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/20 bg-zinc-950 shadow-2xl"
-			>
-				<div class="flex items-center justify-between border-b border-white/10 p-3 md:p-4">
-					<h3 class="text-sm font-bold tracking-wider text-[#9999FF] uppercase md:text-base">
-						📖 Avero Games Documentation
-					</h3>
-					<button
-						onclick={() => (isDocsOpen = false)}
-						class="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/80 hover:bg-white/10 active:scale-95"
-					>
-						✕ Close
-					</button>
-				</div>
-				<div class="relative w-full flex-1 bg-white">
-					<iframe
-						title="Tutorial Source"
-						srcdoc={`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <style>
-          body {
-            margin: 0;
-            padding: 1.5rem;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
-          }
-          pre {
-            margin: 0;
-            white-space: pre-wrap;     /* Wraps long lines nicely */
-            word-break: break-word;    /* Avoids horizontal scrollbars */
-            tab-size: 2;
-          }
-        </style>
-      </head>
-      <body>
-        <pre><code>${tutorial.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>
-      </body>
-    </html>
-  `}
-						style="width: 100%; height: 500px; border: 1px solid #30363d; border-radius: 8px;"
-					></iframe>
-				</div>
-			</div>
-		</div>
-	{/if}
-
-	<!-- Middle Stage: Sprites Layer -->
+	<!-- Portrait Mobile Warning Overlay -->
 	<div
-		class="pointer-events-none relative z-20 flex flex-1 items-end justify-between px-4 pb-2 md:px-12 md:pb-4 landscape:px-12"
+		class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-6 text-center sm:hidden landscape:hidden"
 	>
-		{#if currentNode?.sprites && currentNode.sprites.length > 0}
-			{#each currentNode.sprites as placement (placement.id)}
-				{@const charData = gameData.characters[placement.id]}
-				{#if charData && charData.sprite && gameData.sprites && gameData.sprites[charData.sprite]}
-					{@const spriteImageUrl = gameData.sprites[charData.sprite]}
-					<div
-						class="absolute bottom-16 flex h-48 w-32 items-end justify-center transition-all duration-500 sm:h-64 sm:w-44 md:bottom-28 md:h-96 md:w-64 landscape:bottom-12 landscape:h-56 landscape:w-40
-						{placement.position === 'left' ? 'left-2 sm:left-4 landscape:left-8' : ''}
-						{placement.position === 'left-center' ? 'left-[16%] -translate-x-1/2' : ''}
-						{placement.position === 'center-left' ? 'left-[33%] -translate-x-1/2' : ''}
-						{placement.position === 'center' ? 'left-1/2 -translate-x-1/2' : ''}
-						{placement.position === 'center-right' ? 'left-[66%] -translate-x-1/2' : ''}
-						{placement.position === 'right-center' ? 'left-[83%] -translate-x-1/2' : ''}
-						{placement.position === 'right' ? 'right-2 sm:right-4 landscape:right-8' : ''}"
-					>
-						<img
-							src={spriteImageUrl}
-							alt={charData.name}
-							class="max-h-full max-w-full object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)]"
-						/>
-					</div>
-				{/if}
-			{/each}
-		{/if}
+		<div class="text-4xl">🔄</div>
+		<h2 class="mt-4 text-xl font-bold text-[#9999FF]">Please Rotate Your Device</h2>
+		<p class="mt-2 text-sm text-zinc-400">
+			This game requires landscape orientation to fit the stage box on screen.
+		</p>
 	</div>
 
-	<!-- Bottom Dialogue Frame Box -->
-	{#if currentNode?.text !== undefined && currentNode.text.length > 0}
-		<div class="relative z-30 p-2 pb-4 md:p-6 landscape:p-2 landscape:pb-2">
-			<div class="mx-auto max-w-5xl space-y-2">
-				{#if currentSpeaker}
+	<!-- 2000x1000 Aspect-Ratio Locked Container -->
+	<!-- Container Query Container (cqw / cqh) ensures text/padding scales seamlessly -->
+	<div
+		role="button"
+		tabindex="0"
+		onclick={advanceNode}
+		onkeydown={handleKeyDown}
+		class="@container-size relative flex aspect-2/1 h-full max-h-dvh w-full max-w-dvw flex-col justify-between overflow-hidden bg-black focus:outline-none"
+		style="max-width: calc(100dvh * 2); max-height: calc(100dvw / 2);"
+	>
+		<!-- Video / Background Layer -->
+		{#if videoUrl}
+			<video
+				src={videoUrl}
+				autoplay
+				loop
+				muted
+				playsinline
+				class="absolute inset-0 h-full w-full object-cover"
+			></video>
+		{:else if backgroundUrl}
+			<div
+				class="absolute inset-0 bg-cover bg-center transition-all duration-700"
+				style="background-image: url('{backgroundUrl}');"
+			></div>
+		{/if}
+
+		<!-- Vignette Overlay -->
+		<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+
+		<!-- Audio Unlock Prompt Banner -->
+		{#if !audioUnlocked}
+			<div
+				class="absolute top-[5cqh] left-1/2 z-40 -translate-x-1/2 rounded-full border border-[#9999FF]/40 bg-black/80 px-[2cqw] py-[0.8cqh] text-[1.4cqw] font-semibold text-[#9999FF] shadow-lg backdrop-blur-md"
+			>
+				🔊 Tap anywhere or press Space for audio
+			</div>
+		{/if}
+
+		<!-- Top Menu Header -->
+		<header class="relative z-30 flex items-center justify-between p-[2cqw]">
+			<div class="relative">
+				<!-- Menu Toggle Button -->
+				<button
+					aria-label="Toggle Menu"
+					onclick={(e) => {
+						e.stopPropagation();
+						isMenuOpen = !isMenuOpen;
+					}}
+					class="flex h-[4cqw] min-h-8 w-[4cqw] min-w-8 items-center justify-center rounded-2xl border border-white/15 bg-black/60 text-[2cqw] font-bold backdrop-blur-md transition hover:border-[#9999FF] active:scale-95"
+				>
+					☰
+				</button>
+
+				<!-- Menu Dropdown Container -->
+				{#if isMenuOpen}
 					<div
-						class="inline-flex items-center gap-2 rounded-xl border border-[#9999FF]/30 bg-black/80 px-3 py-1 backdrop-blur-md"
+						role="none"
+						class="fixed inset-0 z-40 bg-transparent"
+						onclick={(e) => {
+							e.stopPropagation();
+							isMenuOpen = false;
+						}}
+					></div>
+
+					<div
+						role="none"
+						onclick={(e) => e.stopPropagation()}
+						class="absolute top-[5cqw] left-0 z-50 w-[24cqw] min-w-64 space-y-4 rounded-2xl border border-white/15 bg-black/95 p-4 shadow-2xl backdrop-blur-xl"
 					>
-						<span class="text-xs">{currentSpeaker.avatar}</span>
-						<span
-							class="text-[10px] font-black tracking-widest text-[#9999FF] uppercase md:text-xs"
-						>
-							{currentSpeaker.name}
-						</span>
+						<div>
+							<span class="text-[0.8cqw] font-black tracking-widest text-white/40 uppercase"
+								>Script Source</span
+							>
+							<div class="mt-2 flex gap-2">
+								<input
+									type="file"
+									accept=".json"
+									bind:this={fileInputRef}
+									onchange={handleFileUpload}
+									class="hidden"
+								/>
+								<button
+									onclick={() => fileInputRef?.click()}
+									class="w-full rounded-xl border border-white/10 bg-white/5 py-2 text-[0.9cqw] font-bold tracking-wider text-white uppercase hover:border-[#9999FF] hover:bg-[#9999FF]/10 active:scale-95"
+								>
+									Load JSON File
+								</button>
+								<button
+									onclick={loadDefaultScript}
+									class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[0.9cqw] font-bold text-white/70 hover:bg-white/10 active:scale-95"
+								>
+									Reset
+								</button>
+							</div>
+						</div>
+
+						<!-- Audio Mute Toggles -->
+						<div class="border-t border-white/10 pt-3">
+							<span class="text-[0.8cqw] font-black tracking-widest text-white/40 uppercase"
+								>Audio Settings</span
+							>
+							<div class="mt-2 grid grid-cols-2 gap-2">
+								<button
+									onclick={() => (isMusicMuted = !isMusicMuted)}
+									class="rounded-xl border p-2 text-[0.8cqw] font-bold uppercase transition active:scale-95 {isMusicMuted
+										? 'border-red-500/50 bg-red-500/10 text-red-400'
+										: 'border-white/10 bg-white/5 text-white/80'}"
+								>
+									Music: {isMusicMuted ? 'Muted' : 'ON'}
+								</button>
+								<button
+									onclick={() => (isSfxMuted = !isSfxMuted)}
+									class="rounded-xl border p-2 text-[0.8cqw] font-bold uppercase transition active:scale-95 {isSfxMuted
+										? 'border-red-500/50 bg-red-500/10 text-red-400'
+										: 'border-white/10 bg-white/5 text-white/80'}"
+								>
+									SFX: {isSfxMuted ? 'Muted' : 'ON'}
+								</button>
+							</div>
+						</div>
+
+						<!-- Auto Play Controls -->
+						<div class="border-t border-white/10 pt-3">
+							<span class="text-[0.8cqw] font-black tracking-widest text-white/40 uppercase"
+								>Playback Controls</span
+							>
+							<div class="mt-2 flex items-center justify-between">
+								<span class="text-[0.9cqw] font-medium text-white/80">Auto Play</span>
+								<button
+									onclick={toggleAutoPlay}
+									class="rounded-xl border px-3 py-1 text-[0.8cqw] font-bold uppercase backdrop-blur-md transition active:scale-95 {isAutoPlay
+										? 'border-emerald-500 bg-emerald-500/20 text-emerald-300'
+										: 'border-white/15 bg-white/5 text-white/70'}"
+								>
+									{isAutoPlay ? 'ON' : 'OFF'}
+								</button>
+							</div>
+							<div class="mt-3 space-y-2">
+								<label class="block text-[0.8cqw] text-white/60">
+									Typewriter Speed: <strong class="text-white">{textSpeed}ms</strong>
+									<input
+										type="range"
+										min="0"
+										max="100"
+										bind:value={textSpeed}
+										class="w-full accent-[#9999FF]"
+									/>
+								</label>
+								<label class="block text-[0.8cqw] text-white/60">
+									Auto Delay: <strong class="text-white">{autoDelay}ms</strong>
+									<input
+										type="range"
+										min="1000"
+										max="10000"
+										step="200"
+										bind:value={autoDelay}
+										class="w-full accent-[#9999FF]"
+									/>
+								</label>
+							</div>
+						</div>
+
+						<!-- Script Node Jump -->
+						<div class="border-t border-white/10 pt-3">
+							<span class="text-[0.8cqw] font-black tracking-widest text-white/40 uppercase"
+								>Script Node Jump</span
+							>
+							<p class="mt-1 text-[0.8cqw] text-white/60">
+								Current Node: <strong class="text-[#9999FF]">{currentIndex + 1}</strong>
+							</p>
+							<div class="mt-2 flex gap-2">
+								<input
+									type="number"
+									placeholder="Node #"
+									bind:value={saveCodeInput}
+									min="1"
+									max={gameData.script.length}
+									class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[0.8cqw] text-white focus:border-[#9999FF] focus:outline-none"
+								/>
+								<button
+									onclick={loadFromSaveCode}
+									class="rounded-xl border border-emerald-500/30 bg-emerald-500/20 px-3 py-1.5 text-[0.8cqw] font-bold text-emerald-300 uppercase hover:bg-emerald-500/30 active:scale-95"
+								>
+									Jump
+								</button>
+							</div>
+						</div>
+
+						<!-- Documentation Button -->
+						<div class="border-t border-white/10 pt-3">
+							<button
+								onclick={() => {
+									isDocsOpen = true;
+									isMenuOpen = false;
+								}}
+								class="w-full rounded-xl border border-[#9999FF]/40 bg-[#9999FF]/10 py-2.5 text-[0.8cqw] font-bold tracking-wider text-[#9999FF] uppercase transition hover:bg-[#9999FF]/20 active:scale-95"
+							>
+								📖 View Documentation
+							</button>
+						</div>
 					</div>
 				{/if}
+			</div>
+		</header>
 
+		<!-- Documentation Modal -->
+		{#if isDocsOpen}
+			<div
+				role="none"
+				onclick={(e) => e.stopPropagation()}
+				class="absolute inset-0 z-50 flex items-center justify-center bg-black/80 p-[4cqw] backdrop-blur-md"
+			>
 				<div
-					class="w-full rounded-2xl border border-white/15 bg-black/85 p-3 text-left shadow-[0_25px_50px_-12px_rgba(0,0,0,0.9)] backdrop-blur-2xl transition duration-300 md:p-6"
+					class="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/20 bg-zinc-950 shadow-2xl"
 				>
-					<p
-						class="min-h-10 text-xs leading-relaxed font-medium text-zinc-100 sm:text-sm md:min-h-16 md:text-lg landscape:min-h-8"
-					>
-						{#each parseMarkdownTokens(displayedText) as token (token.text)}
-							{#if token.type === 'bold'}
-								<strong class="font-bold text-[#9999FF]">{token.text}</strong>
-							{:else if token.type === 'italic'}
-								<em class="text-amber-200 italic">{token.text}</em>
-							{:else if token.type === 'code'}
-								<code class="rounded bg-white/10 px-1 py-0.5 font-mono text-xs text-emerald-300"
-									>{token.text}</code
-								>
-							{:else}
-								<span>{token.text}</span>
-							{/if}
-						{/each}
-						{#if isTyping}
-							<span class="inline-block h-3.5 w-1 animate-pulse bg-[#9999FF]"></span>
-						{/if}
-					</p>
-					<div class="mt-2 flex items-center justify-between border-t border-white/5 pt-2">
-						<span
-							class="font-mono text-[9px] tracking-widest text-[#9999FF] uppercase md:text-[10px]"
+					<div class="flex items-center justify-between border-b border-white/10 p-[1.5cqw]">
+						<h3 class="text-[1.2cqw] font-bold tracking-wider text-[#9999FF] uppercase">
+							📖 Avero Games Documentation
+						</h3>
+						<button
+							onclick={() => (isDocsOpen = false)}
+							class="rounded-xl border border-white/10 bg-white/5 px-[1.5cqw] py-[0.5cqw] text-[1cqw] font-bold text-white/80 hover:bg-white/10 active:scale-95"
 						>
-							Node: [{currentIndex + 1}]
-						</span>
-						<span
-							class="font-mono text-[9px] tracking-widest text-white/40 uppercase md:text-[10px]"
-						>
-							{isTyping ? 'Tap to finish' : 'Tap to continue →'}
-						</span>
+							✕ Close
+						</button>
+					</div>
+					<div class="relative w-full flex-1 bg-white">
+						<iframe
+							title="Tutorial Source"
+							srcdoc={`
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<style>
+					body {
+						margin: 0;
+						padding: 1.5rem;
+						background-color: #0d1117;
+						color: #c9d1d9;
+						font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+						font-size: 0.9rem;
+						line-height: 1.6;
+					}
+					pre {
+						margin: 0;
+						white-space: pre-wrap;
+						word-break: break-word;
+						tab-size: 2;
+					}
+				</style>
+			</head>
+			<body>
+				<pre><code>${tutorial.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>
+			</body>
+		</html>
+	`}
+							style="width: 100%; height: 100%; border: none;"
+						></iframe>
 					</div>
 				</div>
 			</div>
+		{/if}
+
+		<!-- Middle Stage: Sprites Layer -->
+		<div
+			class="pointer-events-none relative z-20 flex flex-1 items-end justify-between px-[4cqw] pb-[16cqh]"
+		>
+			{#if currentNode?.sprites && currentNode.sprites.length > 0}
+				{#each currentNode.sprites as placement (placement.id)}
+					{@const charData = gameData.characters[placement.id]}
+					{#if charData && charData.sprite && gameData.sprites && gameData.sprites[charData.sprite]}
+						{@const spriteImageUrl = gameData.sprites[charData.sprite]}
+						<div
+							style={dynamicSpriteStyle}
+							class="absolute bottom-0 flex w-full items-end justify-center transition-all duration-500
+							{placement.position === 'left' ? 'left-[4cqw]' : ''}
+							{placement.position === 'left-center' ? 'left-[18%] -translate-x-1/2' : ''}
+							{placement.position === 'center-left' ? 'left-[33%] -translate-x-1/2' : ''}
+							{placement.position === 'center' ? 'left-1/2 -translate-x-1/2' : ''}
+							{placement.position === 'center-right' ? 'left-[66%] -translate-x-1/2' : ''}
+							{placement.position === 'right-center' ? 'left-[82%] -translate-x-1/2' : ''}
+							{placement.position === 'right' ? 'right-[4cqw]' : ''}"
+						>
+							<img
+								src={spriteImageUrl}
+								alt={charData.name}
+								class="max-h-full max-w-full object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)]"
+							/>
+						</div>
+					{/if}
+				{/each}
+			{/if}
 		</div>
-	{/if}
+
+		<!-- Bottom Dialogue Frame Box (Locked inside 2000x1000 viewport area) -->
+		{#if currentNode?.text !== undefined && currentNode.text.length > 0}
+			<div class="relative z-30 p-[2cqw] pb-[2cqw]">
+				<div class="mx-auto max-w-full space-y-[1cqh]">
+					{#if currentSpeaker}
+						<div
+							class="inline-flex items-center gap-[0.5cqw] rounded-xl border border-[#9999FF]/30 bg-black/80 px-[1.2cqw] py-[0.4cqh] backdrop-blur-md"
+						>
+							<span class="text-[1.2cqw]">{currentSpeaker.avatar}</span>
+							<span class="text-[1cqw] font-black tracking-widest text-[#9999FF] uppercase">
+								{currentSpeaker.name}
+							</span>
+						</div>
+					{/if}
+
+					<div
+						class="w-full rounded-2xl border border-white/15 bg-black/85 p-[2cqw] text-left shadow-[0_25px_50px_-12px_rgba(0,0,0,0.9)] backdrop-blur-2xl transition duration-300"
+					>
+						<p class="min-h-[5cqh] text-[1.5cqw] leading-relaxed font-medium text-zinc-100">
+							{#each parseMarkdownTokens(displayedText) as token (token.text)}
+								{#if token.type === 'bold'}
+									<strong class="font-bold text-[#9999FF]">{token.text}</strong>
+								{:else if token.type === 'italic'}
+									<em class="text-amber-200 italic">{token.text}</em>
+								{:else if token.type === 'code'}
+									<code
+										class="rounded bg-white/10 px-1 py-0.5 font-mono text-[1.2cqw] text-emerald-300"
+										>{token.text}</code
+									>
+								{:else}
+									<span>{token.text}</span>
+								{/if}
+							{/each}
+							{#if isTyping}
+								<span class="inline-block h-[1.5cqw] w-1 animate-pulse bg-[#9999FF]"></span>
+							{/if}
+						</p>
+						<div
+							class="mt-[1cqh] flex items-center justify-between border-t border-white/5 pt-[0.8cqh]"
+						>
+							<span class="font-mono text-[0.8cqw] tracking-widest text-[#9999FF] uppercase">
+								Node: [{currentIndex + 1}]
+							</span>
+							<span class="font-mono text-[0.8cqw] tracking-widest text-white/40 uppercase">
+								{isTyping ? 'Tap to finish' : 'Tap to continue →'}
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		{/if}
+	</div>
 </div>

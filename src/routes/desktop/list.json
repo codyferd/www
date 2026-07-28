@@ -18,6 +18,7 @@
 	{ "title": "Hop", "icon": "🦘", "path": "/hop" },
 	{ "title": "Jump", "icon": "⏫", "path": "/jump" },
 	{ "title": "Links", "icon": "🔗", "path": "/links" },
+	{ "title": "List", "icon": "📋", "path": "/list" },
 	{ "title": "Maps", "icon": "🗺️", "path": "/maps" },
 	{ "title": "Merge", "icon": "🔀", "path": "/merge" },
 	{ "title": "News", "icon": "📰", "path": "/news" },
