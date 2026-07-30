@@ -5,7 +5,7 @@
 	import Sidebar from './Sidebar.svelte';
 
 	import backgroundImage from './background.avif';
-	import faviconImage from '../favicon.avif';
+	import faviconImage from '../favicon.png';
 	import readmeRawContent from '../../../README.md?raw';
 
 	let activeResizingDesktop = $state<DesktopTab | null>(null);
