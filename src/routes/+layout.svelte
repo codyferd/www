@@ -1,42 +1,61 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from './favicon.avif';
+	import favicon from './favicon.png';
+
 	let { children } = $props();
+
+	const siteUrl = 'https://codyferd.github.io/avero';
+	const title = 'Avero — Modular Web Desktop Environment';
+	const description =
+		'Avero is a user-friendly, open-source web desktop environment built with Svelte and TailwindCSS. Explore a customizable ecosystem of modern applets.';
 </script>
 
 <svelte:head>
-	<!-- Standard Meta Tags -->
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-	<title>Avero</title>
-	<meta name="title" content="Avero" />
-	<meta
-		name="description"
-		content="Avero is a user-friendly, open-source web desktop environment built with Svelte and TailwindCSS. Explore a customizable ecosystem of modern applets."
-	/>
+	<title>{title}</title>
+	<meta name="title" content={title} />
+	<meta name="description" content={description} />
 	<meta
 		name="keywords"
 		content="Avero, Web OS, Web Desktop, Svelte project, SvelteKit, TailwindCSS, open source, web applets"
 	/>
 	<meta name="google-site-verification" content="_v63urJ3pwRcH-D71er8pgN81AdwMHY34lUsla77zjw" />
 	<meta name="theme-color" content="#9999ff" />
-
-	<!-- Open Graph / Facebook -->
+	<link rel="canonical" href={siteUrl} />
 	<meta property="og:type" content="website" />
-	<meta property="og:title" content="Avero" />
-	<meta
-		property="og:description"
-		content="A user-friendly web desktop built for productivity and ease of use. Completely modular and open source."
-	/>
-	<meta property="og:image" content={favicon} />
+	<meta property="og:url" content={siteUrl} />
+	<meta property="og:title" content={title} />
+	<meta property="og:description" content={description} />
+	<meta property="og:site_name" content="Avero" />
+	<meta property="og:locale" content="en_US" />
+	<meta property="og:image" content="{siteUrl}{favicon}" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:url" content={siteUrl} />
+	<meta name="twitter:title" content={title} />
+	<meta name="twitter:description" content={description} />
+	<meta name="twitter:image" content="{siteUrl}{favicon}" />
+	<link rel="icon" type="image/png" href={favicon} />
+	<link rel="apple-touch-icon" href={favicon} />
 
-	<!-- Favicon link mapping your imported asset -->
-	<link rel="icon" type="image/avif" href={favicon} />
+	<!-- JSON-LD Structured Data -->
+	<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "WebApplication",
+			"name": "Avero",
+			"url": "{siteUrl}",
+			"description": "{description}",
+			"applicationCategory": "DesktopEnvironment",
+			"operatingSystem": "All"
+		}
+	</script>
 </svelte:head>
 
-<!-- Visually Hidden SEO Semantic Anchor for Crawlers -->
-<div class="sr-only" aria-hidden="true">
-	<h1>Avero Operating Environment</h1>
+<!-- SEO Semantic Anchor (Visible H1 fix for Crawlers without breaking UI) -->
+<h1 class="sr-only">Avero Operating Environment</h1>
+
+<div class="sr-only">
 	<p>
 		Avero is an open source, web-based operating environment built on SvelteKit and TailwindCSS.
 	</p>

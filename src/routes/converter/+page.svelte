@@ -1,4 +1,3 @@
-<!-- src/routes/converter/+page.svelte -->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Converter, conversionMatrix } from './converter.svelte';
@@ -30,7 +29,7 @@
 					>Avero Matrix Engine v2.5</span
 				>
 				<h1 class="text-2xl font-black tracking-tight text-white md:text-3xl">
-					High-Precision Unit & Currency Converter
+					High-Precision Unit & Color Converter
 				</h1>
 			</div>
 		</header>
@@ -54,6 +53,41 @@
 		<main
 			class="flex flex-col gap-6 rounded-[28px] border border-white/10 bg-white/2 p-6 shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-500 hover:border-[#9999FF]/20 hover:bg-white/4"
 		>
+			<!-- Color Visual Telemetry Preview Bar (Only visible when Color category is active) -->
+			{#if Converter.currentCategory === 'color'}
+				<div class="flex items-center gap-4 rounded-[20px] border border-white/10 bg-black/40 p-4">
+					<div
+						class="h-12 w-12 shrink-0 rounded-xl border border-white/20 shadow-lg transition-colors duration-300"
+						style="background-color: {Converter.currentColorHex};"
+					></div>
+					<div class="flex flex-col gap-1 overflow-hidden">
+						<span class="text-[10px] font-black tracking-[0.2em] text-white/40 uppercase"
+							>Color Target Swatch</span
+						>
+						<div class="flex items-center gap-2">
+							<span class="font-mono text-sm font-bold text-[#9999FF]"
+								>{Converter.currentColorHex}</span
+							>
+							<input
+								type="color"
+								value={Converter.currentColorHex}
+								oninput={(e) => {
+									const target = e.target as HTMLInputElement;
+									if (Converter.sourceUnit === 'hex') {
+										Converter.sourceValue = target.value.toUpperCase();
+									} else {
+										Converter.sourceValue = target.value;
+										Converter.sourceUnit = 'hex';
+									}
+									Converter.calculateTransformation(true);
+								}}
+								class="h-6 w-6 cursor-pointer border-0 bg-transparent"
+							/>
+						</div>
+					</div>
+				</div>
+			{/if}
+
 			<!-- Input Node Panel -->
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<div class="flex flex-col gap-2">
@@ -64,11 +98,13 @@
 					>
 					<input
 						id="src-val"
-						type="number"
+						type={Converter.currentCategory === 'color' ? 'text' : 'number'}
 						bind:value={Converter.sourceValue}
 						oninput={() => Converter.calculateTransformation(true)}
 						class="w-full rounded-[20px] border border-white/10 bg-white/3 px-5 py-3.5 text-base text-white placeholder-white/20 transition duration-300 outline-none focus:border-[#9999FF]/50 focus:bg-white/6 focus:shadow-[0_0_30px_rgba(153,153,255,0.12)]"
-						placeholder="0.00"
+						placeholder={Converter.currentCategory === 'color'
+							? '#9999FF or rgb(153, 153, 255)'
+							: '0.00'}
 						step="any"
 					/>
 				</div>
@@ -104,6 +140,10 @@
 						1 {Converter.sourceUnit} ≈ {Converter.currentExchangeRate.toFixed(4)}
 						{Converter.targetUnit}
 					</span>
+				{:else if Converter.currentCategory === 'color'}
+					<span class="text-[9px] font-black tracking-wide text-[#9999FF]/80 uppercase"
+						>Perceptual Multi-Space Transform Engine</span
+					>
 				{:else}
 					<span class="text-[9px] font-black tracking-wide text-white/20 uppercase"
 						>Normalized SI Baseline Tracking</span
@@ -121,11 +161,11 @@
 					>
 					<input
 						id="tgt-val"
-						type="number"
+						type={Converter.currentCategory === 'color' ? 'text' : 'number'}
 						bind:value={Converter.targetValue}
 						oninput={() => Converter.calculateTransformation(false)}
 						class="w-full rounded-[20px] border border-white/10 bg-white/3 px-5 py-3.5 text-base font-medium text-[#9999FF] placeholder-white/20 transition duration-300 outline-none focus:border-[#9999FF]/50 focus:bg-white/6 focus:shadow-[0_0_30px_rgba(153,153,255,0.12)]"
-						placeholder="0.00"
+						placeholder={Converter.currentCategory === 'color' ? 'rgb(153, 153, 255)' : '0.00'}
 						step="any"
 					/>
 				</div>

@@ -2,6 +2,7 @@
 	{ "title": "About", "icon": "👤", "path": "/about" },
 	{ "title": "Authenticator", "icon": "🔐", "path": "/authenticator" },
 	{ "title": "Calculator", "icon": "🔢", "path": "/calculator" },
+	{ "title": "Calendar", "icon": "🗓️", "path": "/calendar" },
 	{ "title": "Camera", "icon": "📷", "path": "/camera" },
 	{ "title": "Charts", "icon": "📊", "path": "/charts" },
 	{ "title": "Chat", "icon": "💬", "path": "/chat" },
