@@ -5,7 +5,7 @@
 	let { children } = $props();
 
 	const siteUrl = 'https://codyferd.github.io/avero';
-	const title = 'Avero — Modular Web Desktop Environment';
+	const title = 'Avero';
 	const description =
 		'Avero is a user-friendly, open-source web desktop environment built with Svelte and TailwindCSS. Explore a customizable ecosystem of modern applets.';
 </script>
