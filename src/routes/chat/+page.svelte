@@ -6,7 +6,6 @@
 	type PeerClass = PeerModule['Peer'];
 	type RealPeerInstance = InstanceType<PeerClass>;
 
-	// Unpack the exact connection class type signature and intersect our custom runtime metadata tracking values
 	type BaseConnection = ReturnType<RealPeerInstance['connect']>;
 	type PeerConnection = BaseConnection & {
 		username?: string;
@@ -31,11 +30,11 @@
 	let roomId = $state('');
 	let username = $state(`User_${Math.floor(Math.random() * 999)}`);
 	let inputMessage = $state('');
-	let messages: ChatMessage[] = $state([]);
-	let onlineUsers: string[] = $state([]);
+	let messages = $state<ChatMessage[]>([]);
+	let onlineUsers = $state<string[]>([]);
 	let isJoined = $state(false);
 
-	// Synchronize the default local user identity inside the online node listing pool
+	// Synchronize local user identity inside the online node listing pool
 	$effect(() => {
 		if (onlineUsers.length === 0 && username) {
 			onlineUsers = [username];
@@ -44,19 +43,15 @@
 
 	// Non-reactive orchestration structures
 	let peer: RealPeerInstance | null = null;
-
-	// Extend the custom dynamic property directly inline on top of the connection interface array
-	let connections: Array<PeerConnection & { username?: string }> = [];
+	let connections = $state<PeerConnection[]>([]);
 	let currentIdIndex = 0;
 	let roomBaseName = '';
-	let messageContainer: HTMLDivElement;
+	let messageContainer: HTMLDivElement | null = $state(null);
 
-	// Use strict module matching for constructor blueprint type safety
 	let PeerConstructor: PeerClass | null = null;
 
 	onMount(async () => {
 		if (typeof window !== 'undefined') {
-			// Dynamically import peerjs at runtime to maintain SSR safety
 			const module = await import('peerjs');
 			PeerConstructor = module.Peer || module.default;
 		}
@@ -69,40 +64,39 @@
 		}
 	}
 
-	function initConnection(isGlobal = false) {
-		if (!PeerConstructor) return alert('PeerJS loading... try again in a brief second.');
+	function initConnection() {
+		if (!PeerConstructor) return alert('PeerJS loading... try again in a moment.');
+		if (!roomId.trim()) return alert('Please enter a valid Room ID');
 
-		if (isGlobal) {
-			roomBaseName = 'avero_global_public_room';
-		} else {
-			if (!roomId.trim()) return alert('Please enter a valid Room ID');
-			roomBaseName = roomId.trim();
-		}
-
+		roomBaseName = roomId.trim().toLowerCase();
 		currentIdIndex = 0;
 		trySequentialConnect();
 	}
 
 	function trySequentialConnect() {
-		if (!PeerConstructor) return; // Resolves 'possibly null' compiler guard error
+		if (!PeerConstructor) return;
 
 		const targetId = `${roomBaseName}_${currentIdIndex}`;
 
-		// Safely instantiated with exact signature types matching PeerJS design specs
 		peer = new PeerConstructor(targetId) as unknown as RealPeerInstance;
 
 		peer.on('open', () => {
 			isJoined = true;
 			onlineUsers = [username];
 
-			peer?.on('connection', (conn: unknown) => handleInboundConnection(conn as PeerConnection));
+			peer?.on('connection', (conn: unknown) => {
+				handleInboundConnection(conn as PeerConnection);
+			});
 
+			// Attempt connecting to preceding mesh nodes
 			for (let i = 0; i < currentIdIndex; i++) {
 				const checkId = `${roomBaseName}_${i}`;
 				const conn = peer?.connect(checkId, {
 					metadata: { username }
 				});
-				if (conn) handleInboundConnection(conn);
+				if (conn) {
+					handleInboundConnection(conn);
+				}
 			}
 		});
 
@@ -113,7 +107,7 @@
 				currentIdIndex++;
 				trySequentialConnect();
 			} else if (errorPayload.type === 'peer-unavailable') {
-				// Safe discovery ping miss catcher; do nothing
+				// Peer index isn't occupied, normal during discovery
 			} else {
 				console.error('Avero Network Error:', err);
 			}
@@ -133,7 +127,7 @@
 			conn.on('data', (data: unknown) => {
 				const inbound = data as InboundPayload;
 				if ((inbound.type === 'msg' || inbound.type === 'image') && inbound.payload) {
-					messages = [...messages, inbound.payload];
+					messages = [...messages, { ...inbound.payload, self: false }];
 					scrollToBottom();
 				} else if (inbound.type === 'name-announcement' && inbound.username) {
 					conn.username = inbound.username;
@@ -154,12 +148,12 @@
 
 	function refreshActiveUserList() {
 		const names = connections.filter((c) => c.open).map((c) => c.username || 'Unknown Guest');
-		onlineUsers = [username, ...new Set(names)];
+		onlineUsers = Array.from(new Set([username, ...names]));
 	}
 
 	function updateUsernameProfile() {
-		if (!isJoined) return;
 		refreshActiveUserList();
+		if (!isJoined) return;
 		connections.forEach((c) => {
 			if (c.open) c.send({ type: 'name-announcement', username });
 		});
@@ -173,7 +167,7 @@
 			payloadData = { text: inputMessage, type: 'msg' };
 		}
 
-		const standardMessage = {
+		const standardMessage: ChatMessage = {
 			sender: username,
 			id: Date.now() + Math.random(),
 			...payloadData
@@ -215,7 +209,7 @@
 				messages = [...messages, ...imported];
 				scrollToBottom();
 			} catch {
-				alert('Malformed or corrupt structural chat configuration manifest file.');
+				alert('Malformed chat manifest file.');
 			}
 		};
 		reader.readAsText(file);
@@ -236,8 +230,9 @@
 </script>
 
 <div class="flex h-screen w-full flex-col bg-black font-sans tracking-tight text-white md:flex-row">
+	<!-- Sidebar -->
 	<aside
-		class="flex w-full flex-col gap-5 border-b border-white/10 bg-black p-5 md:w-68 md:border-r md:border-b-0"
+		class="flex w-full flex-col gap-5 border-b border-white/10 bg-black p-5 md:w-72 md:border-r md:border-b-0"
 	>
 		<h1
 			class="text-2xl font-black tracking-tighter text-[#9999FF] italic drop-shadow-[0_0_15px_rgba(153,153,255,0.4)]"
@@ -253,18 +248,11 @@
 				class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 font-mono text-xs text-white placeholder-white/30 transition duration-300 outline-none focus:border-[#9999FF]/50 disabled:opacity-40"
 			/>
 			<button
-				onclick={() => initConnection(false)}
+				onclick={initConnection}
 				disabled={isJoined}
 				class="w-full rounded-xl bg-[#9999FF] py-3 text-xs font-bold tracking-wider text-black uppercase shadow-[0_4px_20px_rgba(153,153,255,0.15)] transition-all duration-300 hover:bg-[#8888EE] hover:shadow-[0_0_25px_rgba(153,153,255,0.35)] disabled:opacity-40"
 			>
-				JOIN ROOM
-			</button>
-			<button
-				onclick={() => initConnection(true)}
-				disabled={isJoined}
-				class="w-full rounded-xl border border-white/10 bg-white/5 py-3 text-xs font-bold tracking-wider text-white uppercase transition-all duration-300 hover:bg-white/10 disabled:opacity-40"
-			>
-				GLOBAL CHAT
+				{isJoined ? 'CONNECTED' : 'JOIN ROOM'}
 			</button>
 		</div>
 
@@ -321,6 +309,7 @@
 		</div>
 	</aside>
 
+	<!-- Main Chat Area -->
 	<main class="flex grow flex-col overflow-hidden bg-[#050505]">
 		<div
 			bind:this={messageContainer}
@@ -332,11 +321,12 @@
 						class="max-w-sm rounded-[28px] border border-white/10 bg-white/5 p-12 backdrop-blur-xl"
 					>
 						<span class="text-[10px] font-black tracking-[0.25em] text-[#9999FF] uppercase"
-							>Avero Ecosystem System State</span
+							>Avero Network State</span
 						>
 						<p class="mt-2 text-sm text-white/50">
-							Mesh network initialization idle. Establish or query a communication link node via the
-							dashboard menu.
+							{isJoined
+								? 'Room ready. Send a message to start communicating.'
+								: 'Enter a Room ID in the sidebar to connect to a P2P mesh.'}
 						</p>
 					</div>
 				</div>
@@ -358,7 +348,7 @@
 						{#if msg.image}
 							<img
 								src={msg.image}
-								alt="Decoded pipe transport payload asset"
+								alt="Uploaded content"
 								class="mt-1 max-w-full rounded-xl border border-black/10"
 							/>
 						{/if}
@@ -367,6 +357,7 @@
 			{/each}
 		</div>
 
+		<!-- Chat Input -->
 		<div class="border-t border-white/10 bg-black p-4">
 			<div class="mx-auto flex max-w-5xl items-center gap-3">
 				<label
@@ -381,7 +372,7 @@
 					onkeydown={(e) => e.key === 'Enter' && handleSendMessage()}
 					placeholder={isJoined
 						? 'Transmit encrypted text data pipeline...'
-						: 'Initialize link vector configuration node first'}
+						: 'Join a room to start sending messages...'}
 					disabled={!isJoined}
 					class="w-full grow rounded-xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm text-white placeholder-white/20 transition duration-300 outline-none focus:border-[#9999FF]/50 focus:bg-white/10 disabled:opacity-40"
 				/>
