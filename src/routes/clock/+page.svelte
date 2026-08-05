@@ -1,4 +1,3 @@
-<!-- src/routes/clock/+page.svelte -->
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import { Clock } from './clock.svelte';
@@ -32,6 +31,15 @@
 			Timer
 		</button>
 		<button
+			onclick={() => (Clock.currentTab = 'alarm')}
+			class="rounded-lg px-4 py-2 text-[10px] font-black tracking-wider uppercase transition-all duration-200 {Clock.currentTab ===
+			'alarm'
+				? 'bg-[#9999FF]/15 text-[#9999FF]'
+				: 'text-zinc-500 hover:text-white'}"
+		>
+			Alarm
+		</button>
+		<button
 			onclick={() => (Clock.currentTab = 'worldtime')}
 			class="rounded-lg px-4 py-2 text-[10px] font-black tracking-wider uppercase transition-all duration-200 {Clock.currentTab ===
 			'worldtime'
@@ -46,6 +54,21 @@
 	<div
 		class="w-full max-w-lg rounded-[28px] border border-white/10 bg-white/2 p-6 shadow-[0_0_20px_rgba(153,153,255,0.05)] backdrop-blur-xl transition-all duration-500 hover:border-[#9999FF]/20 hover:bg-white/4 md:p-10"
 	>
+		<!-- Global Notification Request Banner -->
+		{#if Clock.notificationPermission !== 'granted'}
+			<div
+				class="mb-6 flex w-full items-center justify-between rounded-xl border border-[#9999FF]/20 bg-[#9999FF]/10 px-4 py-2.5 text-xs text-zinc-300"
+			>
+				<span class="text-[10px] font-bold uppercase">Enable Alerts for Timer & Alarms</span>
+				<button
+					onclick={() => Clock.requestNotificationPermission()}
+					class="rounded-lg bg-[#9999FF] px-3 py-1 text-[10px] font-black tracking-wider text-black uppercase transition hover:bg-[#8888EE]"
+				>
+					Allow
+				</button>
+			</div>
+		{/if}
+
 		<!-- ================== MODE: STOPWATCH ================== -->
 		{#if Clock.currentTab === 'stopwatch'}
 			<div class="flex flex-col items-center gap-6">
@@ -233,6 +256,115 @@
 			</div>
 		{/if}
 
+		<!-- ================== MODE: ALARM ================== -->
+		{#if Clock.currentTab === 'alarm'}
+			<div class="flex flex-col items-center gap-6">
+				<span class="text-[10px] font-black tracking-[0.4em] text-[#9999FF] uppercase"
+					>Alarm Dispatcher</span
+				>
+
+				<!-- Alarm Creation Input Panel -->
+				<div class="flex w-full flex-col gap-3">
+					<div class="flex gap-2">
+						<input
+							type="time"
+							bind:value={Clock.alarmInput.time}
+							class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 font-mono text-sm text-white outline-none focus:border-[#9999FF]/50"
+						/>
+						<input
+							type="text"
+							placeholder="Alarm Label"
+							bind:value={Clock.alarmInput.label}
+							class="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white placeholder-white/20 outline-none focus:border-[#9999FF]/50"
+						/>
+						<button
+							onclick={() => Clock.addAlarm()}
+							class="rounded-xl bg-[#9999FF] px-5 text-[10px] font-black tracking-wider text-black uppercase transition hover:bg-[#8888EE]"
+						>
+							Add
+						</button>
+					</div>
+
+					<!-- Days Schedule Selector -->
+					<div
+						class="flex w-full justify-between gap-1 rounded-xl border border-white/5 bg-white/2 p-1.5"
+					>
+						{#each Clock.allDays as day (day)}
+							<button
+								type="button"
+								onclick={() => Clock.toggleInputDay(day)}
+								class="rounded-lg px-2 py-1 text-[9px] font-bold transition-all {Clock.alarmInput.days.includes(
+									day
+								)
+									? 'bg-[#9999FF] text-black'
+									: 'bg-white/5 text-zinc-500 hover:text-zinc-300'}"
+							>
+								{day}
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Tracked Alarms List -->
+				<div
+					class="flex h-56 w-full flex-col overflow-hidden rounded-2xl border border-white/5 bg-white/1"
+				>
+					<div
+						class="flex-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent overflow-y-auto p-3"
+					>
+						{#if Clock.alarms.length === 0}
+							<div
+								class="flex h-full items-center justify-center text-[9px] font-bold tracking-widest text-white/20 uppercase"
+							>
+								No Alarms Configured
+							</div>
+						{:else}
+							{#each Clock.alarms as alarm (alarm.id)}
+								<div
+									class="flex items-center justify-between rounded-xl border-b border-white/5 px-3 py-3 transition last:border-0 hover:bg-white/2"
+								>
+									<div class="flex flex-col gap-1">
+										<div class="flex items-baseline gap-2">
+											<span class="font-mono text-lg font-bold text-white">{alarm.time}</span>
+											<span class="text-[10px] font-medium text-zinc-400">{alarm.label}</span>
+										</div>
+										<!-- Days Tag Pill Row -->
+										<div class="flex gap-1">
+											{#each Clock.allDays as day (day)}
+												<span
+													class="text-[8px] font-bold {alarm.days.includes(day)
+														? 'text-[#9999FF]'
+														: 'text-zinc-700'}"
+												>
+													{day}
+												</span>
+											{/each}
+										</div>
+									</div>
+									<div class="flex items-center gap-3">
+										<button
+											onclick={() => Clock.toggleAlarm(alarm.id)}
+											class="rounded-lg px-3 py-1 text-[9px] font-black tracking-wider uppercase transition {alarm.enabled
+												? 'border border-emerald-500/30 bg-emerald-500/20 text-emerald-400'
+												: 'border border-white/5 bg-white/5 text-zinc-500'}"
+										>
+											{alarm.enabled ? 'Active' : 'Off'}
+										</button>
+										<button
+											onclick={() => Clock.removeAlarm(alarm.id)}
+											class="cursor-pointer border-none bg-transparent p-0 text-sm font-bold text-zinc-600 transition-colors hover:text-rose-400"
+										>
+											×
+										</button>
+									</div>
+								</div>
+							{/each}
+						{/if}
+					</div>
+				</div>
+			</div>
+		{/if}
+
 		<!-- ================== MODE: WORLD TIME ================== -->
 		{#if Clock.currentTab === 'worldtime'}
 			<div class="flex flex-col items-center gap-6">
@@ -245,7 +377,7 @@
 					class="flex w-full flex-col items-center justify-center rounded-2xl border border-white/5 bg-white/1 p-4"
 				>
 					<span class="mb-1 text-[9px] font-black tracking-[0.25em] text-[#9999FF] uppercase"
-						>Local Terminal Frame</span
+						>Local Terminal Frame (24-Hour)</span
 					>
 					<div class="font-mono text-3xl font-black text-zinc-100">{Clock.localClockDisplay}</div>
 				</div>

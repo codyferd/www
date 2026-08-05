@@ -1,5 +1,3 @@
-// src/routes/clock/clock.svelte.ts
-
 export interface MeshMove {
 	from: string;
 	to: string;
@@ -11,9 +9,19 @@ export interface TrackedZone {
 	zone: string;
 }
 
+export type DayOfWeek = 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat';
+
+export interface AlarmItem {
+	id: string;
+	time: string; // HH:mm format (24-hour)
+	label: string;
+	enabled: boolean;
+	days: DayOfWeek[]; // Days on which the alarm repeats
+}
+
 class ClockEngine {
 	// --- Tab Architecture ---
-	public currentTab = $state<'stopwatch' | 'timer' | 'worldtime'>('stopwatch');
+	public currentTab = $state<'stopwatch' | 'timer' | 'worldtime' | 'alarm'>('stopwatch');
 
 	// --- Component State Matrices ---
 	public stopwatch = $state({
@@ -38,6 +46,19 @@ class ClockEngine {
 		{ id: '1', label: 'GMT Baseline', zone: 'Etc/GMT' }
 	]);
 
+	// --- Alarm System State ---
+	public alarms = $state<AlarmItem[]>([]);
+	public alarmInput = $state({
+		time: '08:00',
+		label: 'Alarm',
+		days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as DayOfWeek[]
+	});
+	public notificationPermission = $state<NotificationPermission>('default');
+
+	// --- Audio & Web API State ---
+	private audioCtx: AudioContext | null = null;
+	private activeAlarmIds = new Set<string>();
+
 	// --- Native Intervals ---
 	private stopwatchInterval: ReturnType<typeof setInterval> | null = null;
 	private stopwatchStartTime = 0;
@@ -45,11 +66,133 @@ class ClockEngine {
 	private timerEndTime = 0;
 	private globalClockInterval: ReturnType<typeof setInterval> | null = null;
 
+	public readonly allDays: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 	constructor() {
 		if (typeof window !== 'undefined') {
+			if ('Notification' in window) {
+				this.notificationPermission = Notification.permission;
+			}
+
 			this.globalClockInterval = setInterval(() => {
-				this.systemClockTime = new Date();
+				const now = new Date();
+				this.systemClockTime = now;
+				this.checkAlarms(now);
 			}, 1000);
+		}
+	}
+
+	// --- Sound & Notification Helpers ---
+	public async requestNotificationPermission() {
+		if (typeof window !== 'undefined' && 'Notification' in window) {
+			const permission = await Notification.requestPermission();
+			this.notificationPermission = permission;
+		}
+	}
+
+	private triggerAlert(title: string, body: string) {
+		this.playAlarmSound();
+
+		if (
+			typeof window !== 'undefined' &&
+			'Notification' in window &&
+			Notification.permission === 'granted'
+		) {
+			new Notification(title, { body });
+		}
+	}
+
+	public playAlarmSound() {
+		if (typeof window === 'undefined') return;
+
+		const AudioContextClass =
+			window.AudioContext ||
+			(window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+		if (!this.audioCtx) {
+			this.audioCtx = new AudioContextClass();
+		}
+
+		if (this.audioCtx.state === 'suspended') {
+			this.audioCtx.resume();
+		}
+
+		// Play a repeating two-tone alarm melody over 2 seconds
+		const now = this.audioCtx.currentTime;
+		const osc = this.audioCtx.createOscillator();
+		const gain = this.audioCtx.createGain();
+
+		osc.type = 'square';
+
+		// Pulse frequencies for classic digital alarm effect
+		for (let i = 0; i < 6; i++) {
+			const startTime = now + i * 0.3;
+			const freq = i % 2 === 0 ? 880 : 1046.5; // A5 and C6 notes
+			osc.frequency.setValueAtTime(freq, startTime);
+			gain.gain.setValueAtTime(0.2, startTime);
+			gain.gain.setValueAtTime(0, startTime + 0.15);
+		}
+
+		osc.connect(gain);
+		gain.connect(this.audioCtx.destination);
+
+		osc.start(now);
+		osc.stop(now + 1.8);
+	}
+
+	// --- Alarm Routines ---
+	public toggleInputDay(day: DayOfWeek) {
+		if (this.alarmInput.days.includes(day)) {
+			this.alarmInput.days = this.alarmInput.days.filter((d) => d !== day);
+		} else {
+			this.alarmInput.days = [...this.alarmInput.days, day];
+		}
+	}
+
+	public addAlarm() {
+		if (!this.alarmInput.time) return;
+		this.alarms.push({
+			id: Date.now().toString(),
+			time: this.alarmInput.time,
+			label: this.alarmInput.label || 'Alarm',
+			enabled: true,
+			days: [...this.alarmInput.days]
+		});
+		this.alarmInput.label = 'Alarm';
+	}
+
+	public toggleAlarm(id: string) {
+		const alarm = this.alarms.find((a) => a.id === id);
+		if (alarm) alarm.enabled = !alarm.enabled;
+	}
+
+	public removeAlarm(id: string) {
+		this.alarms = this.alarms.filter((a) => a.id !== id);
+	}
+
+	private checkAlarms(now: Date) {
+		const currentFormatted = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+		const seconds = now.getSeconds();
+		const currentDay = this.allDays[now.getDay()];
+
+		// Check once at the start of the minute
+		if (seconds === 0) {
+			this.alarms.forEach((alarm) => {
+				const matchesDay = alarm.days.length === 0 || alarm.days.includes(currentDay);
+				if (
+					alarm.enabled &&
+					alarm.time === currentFormatted &&
+					matchesDay &&
+					!this.activeAlarmIds.has(alarm.id)
+				) {
+					this.activeAlarmIds.add(alarm.id);
+					this.triggerAlert(
+						`Alarm: ${alarm.label}`,
+						`Your alarm set for ${alarm.time} is going off!`
+					);
+				}
+			});
+		} else if (seconds === 1) {
+			this.activeAlarmIds.clear();
 		}
 	}
 
@@ -78,8 +221,9 @@ class ClockEngine {
 		};
 	}
 
+	// Explicit 24-Hour Digital Display
 	public get localClockDisplay() {
-		return this.systemClockTime.toLocaleTimeString('en-US', {
+		return this.systemClockTime.toLocaleTimeString('en-GB', {
 			hour12: false,
 			hour: '2-digit',
 			minute: '2-digit',
@@ -90,7 +234,7 @@ class ClockEngine {
 	public get computedZoneTimes() {
 		return this.trackedZones.map((item) => {
 			try {
-				const timeStr = this.systemClockTime.toLocaleTimeString('en-US', {
+				const timeStr = this.systemClockTime.toLocaleTimeString('en-GB', {
 					timeZone: item.zone,
 					hour12: false,
 					hour: '2-digit',
@@ -161,6 +305,9 @@ class ClockEngine {
 					this.timer.isRunning = false;
 					this.timer.isExpired = true;
 					if (this.timerInterval) clearInterval(this.timerInterval);
+
+					// Trigger Alert & Web Notification when timer finishes
+					this.triggerAlert('Timer Complete', 'Your countdown timer has expired!');
 				} else {
 					this.timer.remainingTime = diff;
 				}
@@ -252,6 +399,7 @@ class ClockEngine {
 		if (this.stopwatchInterval) clearInterval(this.stopwatchInterval);
 		if (this.timerInterval) clearInterval(this.timerInterval);
 		if (this.globalClockInterval) clearInterval(this.globalClockInterval);
+		if (this.audioCtx) this.audioCtx.close();
 	}
 }
 

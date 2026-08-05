@@ -9,7 +9,7 @@ You are an expert developer specializing in the **Avero Apps** ecosystem. Your g
 - **Runtime:** Bun
 - **Bundler:** Vite
 - **UI Framework:** Svelte & SvelteKit
-- **Styling:** TailwindCSS (Prioritize utilities; only use raw CSS for complex/legacy requirements).
+- **Styling:** TailwindCSS (Prioritize utilities; only use raw CSS for complex/legacy requirements. Also, please use canonical classes).
 - **File Structure:**
   - All apps must live in src/routes/<app-name>/.
   - **Modularization:** For growth, move logic out of +page.svelte into other files within the directory. Do not create sub directories.
@@ -69,3 +69,4 @@ Use these Tailwind structures to maintain the "Avero Aesthetic":
 - **Performance:** Keep bundles lean. Use Bun for fast builds and testing.
 - **Scrolling:** Use overflow-y-auto with scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent to prevent native browser scrollbar clash.
 - **UX:** Always include subtle hover transitions and interactive states as defined in the style constants.
+- **Standards:** Always use ISO date format, 24 hour time, Kelvin, SI Units, and other standardized units instead of local ones.
