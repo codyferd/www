@@ -18,7 +18,6 @@
 	{ "title": "Fetch", "icon": "ℹ️", "path": "/fetch" },
 	{ "title": "Files", "icon": "📁", "path": "/files" },
 	{ "title": "Gallery", "icon": "🖼️", "path": "/gallery" },
-	{ "title": "Health", "icon": "❤️", "path": "/health" },
 	{ "title": "Hop", "icon": "🦘", "path": "/hop" },
 	{ "title": "Jump", "icon": "⏫", "path": "/jump" },
 	{ "title": "Links", "icon": "🔗", "path": "/links" },

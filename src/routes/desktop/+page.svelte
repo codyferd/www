@@ -1,11 +1,10 @@
-<!-- +page.svelte -->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DesktopEngine, type DesktopTab } from './store.svelte';
 	import Sidebar from './Sidebar.svelte';
 
 	import backgroundImage from './background.avif';
-	import faviconImage from '../favicon.png';
+	import faviconImage from '../favicon.avif';
 	import readmeRawContent from '../../../README.md?raw';
 
 	let activeResizingDesktop = $state<DesktopTab | null>(null);
@@ -29,6 +28,28 @@
 			DesktopEngine.versionNumber = firstLine.replace(/[#\s]/g, '');
 		}
 
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// Super / Meta key -> Toggle Sidebar
+			if (e.key === 'Meta' && !e.altKey) {
+				e.preventDefault();
+				DesktopEngine.toggleSidebar();
+				return;
+			}
+
+			// Alt key alone -> Refresh active app iframe
+			if (e.key === 'Alt' && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
+				e.preventDefault();
+				if (DesktopEngine.focusedAppId) {
+					const iframe = document.getElementById(
+						`frame-${DesktopEngine.focusedAppId}`
+					) as HTMLIFrameElement | null;
+					if (iframe && iframe.contentWindow) {
+						iframe.contentWindow.location.reload();
+					}
+				}
+			}
+		};
+
 		const handleMessage = (event: MessageEvent) => {
 			if (event.data?.type === 'AVERO_OPEN_TAB') {
 				const { title, content } = event.data;
@@ -44,13 +65,41 @@
 				});
 				DesktopEngine.activeDesktopId = id;
 				DesktopEngine.focusedAppId = id;
+			} else if (event.data?.type === 'AVERO_KEY_DOWN') {
+				if (event.data?.key === 'Meta') {
+					DesktopEngine.toggleSidebar();
+				}
 			}
 		};
 
+		// Attach keyboard listeners directly to all iframe windows (works for same-origin tabs)
+		const attachIframeListeners = () => {
+			const iframes = document.querySelectorAll('iframe');
+			iframes.forEach((iframe) => {
+				try {
+					const iframeWin = iframe.contentWindow as
+						(Window & { __averoMetaListenerAttached?: boolean }) | null;
+					if (iframeWin && !iframeWin.__averoMetaListenerAttached) {
+						iframeWin.__averoMetaListenerAttached = true;
+						iframeWin.addEventListener('keydown', handleKeyDown);
+					}
+				} catch {
+					// Cross-origin restriction; handled via postMessage
+				}
+			});
+		};
+
+		// Check for newly loaded iframes periodically
+		const iframeCheckInterval = setInterval(attachIframeListeners, 1000);
+
 		window.addEventListener('message', handleMessage);
+		window.addEventListener('keydown', handleKeyDown);
+
 		return () => {
 			clearInterval(interval);
+			clearInterval(iframeCheckInterval);
 			window.removeEventListener('message', handleMessage);
+			window.removeEventListener('keydown', handleKeyDown);
 		};
 	});
 
