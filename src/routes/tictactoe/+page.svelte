@@ -1,7 +1,7 @@
 <script lang="ts">
-	// Types & Interfaces
-	type Mark = 'X' | 'O' | null;
+	import { getAIMove, type Mark, type Difficulty } from './ai';
 
+	// Types & Interfaces
 	interface MatchHistoryItem {
 		round: number;
 		opening: string;
@@ -9,11 +9,17 @@
 		strategy: string;
 	}
 
+	type GameMode = 'pvp' | 'ai';
+
 	// Game Configuration & State (Svelte 5 Runes)
 	let gameStarted = $state(false);
 	let showLearn = $state(false);
 	let totalRounds = $state(2);
 	let currentRound = $state(1);
+
+	// Mode & Difficulty Setup
+	let gameMode = $state<GameMode>('ai');
+	let difficulty = $state<Difficulty>('hard');
 
 	let scores = $state({ P1: 0, P2: 0 });
 	let matchHistory = $state<MatchHistoryItem[]>([]);
@@ -26,6 +32,15 @@
 
 	// Derived Calculations
 	const isP1TurnToStartX = $derived(currentRound % 2 !== 0);
+
+	// P1 always plays human in AI mode. This calculates which mark P1 controls each round.
+	const p1Mark = $derived<'X' | 'O'>(isP1TurnToStartX ? 'X' : 'O');
+	const aiMark = $derived<'X' | 'O'>(p1Mark === 'X' ? 'O' : 'X');
+
+	const currentTurnChar = $derived<'X' | 'O'>(isXNext ? 'X' : 'O');
+	const isAITurn = $derived(
+		gameMode === 'ai' && currentTurnChar === aiMark && !winner && board.includes(null)
+	);
 
 	const types = ['x', 'y', 'x', 'y', 'z', 'y', 'x', 'y', 'x'];
 	const openingMap: Record<string, string> = {
@@ -59,19 +74,19 @@
 	function playCell(i: number) {
 		if (board[i] || winner) return;
 
-		const char: 'X' | 'O' = isXNext ? 'X' : 'O';
+		const char = currentTurnChar;
 		board[i] = char;
 		moves.push(i);
 
 		const winPaths = [
 			[0, 1, 2],
 			[3, 4, 5],
-			[6, 7, 8], // Rows
+			[6, 7, 8],
 			[0, 3, 6],
 			[1, 4, 7],
-			[2, 5, 8], // Columns
+			[2, 5, 8],
 			[0, 4, 8],
-			[2, 4, 6] // Diagonals
+			[2, 4, 6]
 		];
 
 		for (const path of winPaths) {
@@ -96,11 +111,25 @@
 		isXNext = !isXNext;
 	}
 
+	// Trigger AI move automatically when it's the AI's turn
+	$effect(() => {
+		if (gameStarted && isAITurn && !winner && !isDraw) {
+			const timer = setTimeout(() => {
+				const bestMove = getAIMove(board, aiMark, difficulty);
+				if (bestMove !== -1) {
+					playCell(bestMove);
+				}
+			}, 300);
+
+			return () => clearTimeout(timer);
+		}
+	});
+
 	function nextRound() {
 		let winnerName = 'Draw';
 		if (winner) {
 			const isP1 = (winner === 'X' && isP1TurnToStartX) || (winner === 'O' && !isP1TurnToStartX);
-			winnerName = isP1 ? 'P1' : 'P2';
+			winnerName = isP1 ? 'P1' : gameMode === 'ai' ? `AI (${difficulty})` : 'P2';
 		}
 
 		matchHistory.push({
@@ -111,7 +140,6 @@
 		});
 
 		if (currentRound >= totalRounds) {
-			// Complete Reset
 			gameStarted = false;
 			currentRound = 1;
 			scores = { P1: 0, P2: 0 };
@@ -136,7 +164,6 @@
 <div
 	class="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-black p-4 font-sans text-white md:p-8"
 >
-	<!-- Central App Canvas -->
 	<div
 		class="w-full max-w-4xl space-y-8 rounded-[28px] border border-white/10 bg-white/2 p-6 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-xl transition-all duration-500 hover:border-[#9999FF]/20 md:p-10"
 	>
@@ -167,31 +194,74 @@
 
 		<!-- Configuration View (Match Setup) -->
 		{#if !gameStarted}
-			<div class="mx-auto max-w-md space-y-8 py-6 text-center">
+			<div class="mx-auto max-w-md space-y-6 py-4 text-center">
 				<div class="space-y-2">
 					<span class="text-[10px] font-black tracking-[0.25em] text-[#9999FF] uppercase"
-						>Balanced Tournament Mode</span
+						>Match Parameters</span
 					>
-					<h2 class="text-xl font-bold text-white">Select Match Length</h2>
-					<p class="text-xs text-white/40">
-						Alternating dynamic starting positions guarantee competitive fairness across all match
-						lengths.
-					</p>
+					<h2 class="text-xl font-bold text-white">Configure Session</h2>
 				</div>
 
-				<!-- Round Selector Buttons -->
-				<div class="flex flex-wrap justify-center gap-2">
-					{#each [1, 2, 4, 6, 10] as n (n)}
+				<!-- Game Mode Toggle -->
+				<div class="space-y-2">
+					<span class="block text-[10px] font-bold text-white/40 uppercase">Opponent</span>
+					<div class="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/5 p-1.5">
 						<button
-							onclick={() => (totalRounds = n)}
-							class="h-12 w-12 rounded-2xl border font-mono text-sm font-bold transition-all duration-300 {totalRounds ===
-							n
-								? 'border-[#9999FF] bg-[#9999FF] text-black shadow-[0_0_20px_rgba(153,153,255,0.4)]'
-								: 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:bg-white/10'}"
+							onclick={() => (gameMode = 'ai')}
+							class="rounded-xl py-2.5 font-mono text-xs font-bold transition-all {gameMode === 'ai'
+								? 'bg-[#9999FF] text-black shadow-[0_0_15px_rgba(153,153,255,0.3)]'
+								: 'text-white/60 hover:text-white'}"
 						>
-							{n}
+							vs AI
 						</button>
-					{/each}
+						<button
+							onclick={() => (gameMode = 'pvp')}
+							class="rounded-xl py-2.5 font-mono text-xs font-bold transition-all {gameMode ===
+							'pvp'
+								? 'bg-[#9999FF] text-black shadow-[0_0_15px_rgba(153,153,255,0.3)]'
+								: 'text-white/60 hover:text-white'}"
+						>
+							Pass & Play
+						</button>
+					</div>
+				</div>
+
+				<!-- AI Difficulty Options -->
+				{#if gameMode === 'ai'}
+					<div class="space-y-2">
+						<span class="block text-[10px] font-bold text-white/40 uppercase">AI Difficulty</span>
+						<div class="grid grid-cols-3 gap-2">
+							{#each ['easy', 'medium', 'hard'] as diff (diff)}
+								<button
+									onclick={() => (difficulty = diff as Difficulty)}
+									class="rounded-xl border py-2 font-mono text-xs font-bold capitalize transition-all {difficulty ===
+									diff
+										? 'border-[#9999FF] bg-[#9999FF]/20 text-[#9999FF]'
+										: 'border-white/10 bg-white/5 text-white/40 hover:text-white'}"
+								>
+									{diff}
+								</button>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Round Selector -->
+				<div class="space-y-2">
+					<span class="block text-[10px] font-bold text-white/40 uppercase">Rounds</span>
+					<div class="flex justify-center gap-2">
+						{#each [1, 2, 4, 6, 10] as n (n)}
+							<button
+								onclick={() => (totalRounds = n)}
+								class="h-10 w-10 rounded-xl border font-mono text-xs font-bold transition-all {totalRounds ===
+								n
+									? 'border-[#9999FF] bg-[#9999FF] text-black shadow-[0_0_15px_rgba(153,153,255,0.3)]'
+									: 'border-white/10 bg-white/5 text-white/60 hover:border-white/20'}"
+							>
+								{n}
+							</button>
+						{/each}
+					</div>
 				</div>
 
 				<div class="space-y-3 pt-4">
@@ -215,15 +285,26 @@
 			<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
 				<!-- Left Play Zone -->
 				<div class="flex flex-col items-center space-y-6 lg:col-span-7">
-					<!-- Opening & Strategy Status Bar -->
+					<!-- Turn & Strategy Status Bar -->
 					<div class="flex min-h-13 flex-col items-center justify-center space-y-2 text-center">
+						{#if isAITurn}
+							<div class="animate-pulse font-mono text-[11px] font-bold text-[#9999FF] uppercase">
+								AI is calculating...
+							</div>
+						{:else if !winner && !isDraw}
+							<div class="font-mono text-[11px] font-bold text-white/60 uppercase">
+								Turn: <span class="text-[#9999FF]">{currentTurnChar}</span>
+							</div>
+						{/if}
+
 						{#if openingName}
 							<div
-								class="rounded-full border border-[#9999FF]/30 bg-[#9999FF]/10 px-4 py-1.5 text-[10px] font-black tracking-widest text-[#9999FF] uppercase shadow-[0_0_15px_rgba(153,153,255,0.15)]"
+								class="rounded-full border border-[#9999FF]/30 bg-[#9999FF]/10 px-4 py-1 text-[10px] font-black tracking-widest text-[#9999FF] uppercase"
 							>
 								{openingName} OPENING
 							</div>
 						{/if}
+
 						{#if winner && roundStrategy}
 							<div
 								class="animate-pulse font-mono text-[11px] font-black tracking-widest text-amber-400 uppercase"
@@ -242,7 +323,7 @@
 						{#each board as val, i (i)}
 							<button
 								onclick={() => playCell(i)}
-								disabled={!!val || !!winner || isDraw}
+								disabled={!!val || !!winner || isDraw || isAITurn}
 								class="flex items-center justify-center rounded-2xl border border-white/10 bg-white/2 text-3xl font-black transition-all duration-300 hover:border-[#9999FF]/30 hover:bg-white/5 active:scale-95 disabled:cursor-default {val ===
 								'X'
 									? 'border-[#9999FF]/40 bg-[#9999FF]/5 text-[#9999FF] shadow-[0_0_20px_rgba(153,153,255,0.25)]'
@@ -259,15 +340,15 @@
 					<div class="w-full max-w-[320px] space-y-4">
 						<div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4 text-center">
 							<div class="rounded-2xl border border-white/5 bg-white/1 p-3">
-								<span class="block text-[9px] font-black tracking-widest text-white/40 uppercase"
-									>P1 Score</span
-								>
+								<span class="block text-[9px] font-black tracking-widest text-white/40 uppercase">
+									Player 1 ({p1Mark})
+								</span>
 								<span class="font-mono text-2xl font-black text-white">{scores.P1}</span>
 							</div>
 							<div class="rounded-2xl border border-white/5 bg-white/1 p-3">
-								<span class="block text-[9px] font-black tracking-widest text-white/40 uppercase"
-									>P2 Score</span
-								>
+								<span class="block text-[9px] font-black tracking-widest text-white/40 uppercase">
+									{gameMode === 'ai' ? `AI (${aiMark})` : `Player 2 (${aiMark})`}
+								</span>
 								<span class="font-mono text-2xl font-black text-white">{scores.P2}</span>
 							</div>
 						</div>

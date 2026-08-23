@@ -1,5 +1,6 @@
 <script lang="ts">
 	import socialLinksData from './list.json';
+	import Mkwii from './mkwii.svelte';
 
 	interface SocialLink {
 		name: string;
@@ -10,10 +11,16 @@
 
 	const socialLinks: SocialLink[] = socialLinksData;
 
+	let isStatsOpen = $state(false);
+
 	const openExternal = (url?: string) => {
 		if (url) {
 			window.open(url, '_blank', 'noopener,noreferrer');
 		}
+	};
+
+	const toggleStats = () => {
+		isStatsOpen = !isStatsOpen;
 	};
 </script>
 
@@ -66,6 +73,47 @@
 			>
 				Discord Invite
 			</button>
+		</div>
+
+		<!-- MKWii Stats Dropdown -->
+		<div
+			class="rounded-3xl border border-white/10 bg-white/2 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-md transition-all duration-300 hover:border-[#9999FF]/30"
+		>
+			<button
+				onclick={toggleStats}
+				class="flex w-full cursor-pointer items-center justify-between text-left"
+			>
+				<div>
+					<span class="text-[10px] font-black tracking-widest text-[#9999FF] uppercase">
+						Statistics
+					</span>
+					<h3 class="text-2xl font-black tracking-tighter text-white italic">
+						Mario Kart Wii Stats
+					</h3>
+				</div>
+				<div
+					class="rounded-full bg-white/5 p-3 text-white transition-transform duration-300 {isStatsOpen
+						? 'rotate-180'
+						: ''}"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-5 w-5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				</div>
+			</button>
+
+			<Mkwii isOpen={isStatsOpen} />
 		</div>
 	</main>
 </div>

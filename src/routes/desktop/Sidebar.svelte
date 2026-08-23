@@ -192,7 +192,7 @@
 		Applications System
 	</div>
 	<div class="flex flex-1 flex-col gap-1.5 overflow-y-auto px-3 pb-3">
-		{#each DesktopEngine.sortedAppList as app (app.title)}
+		{#each DesktopEngine.filteredAppList as app (app.title)}
 			<button
 				onclick={() => DesktopEngine.launchNewDesktop(app)}
 				class="group flex items-center gap-3 rounded-lg border border-white/5 bg-white/1 p-2.5 text-left transition-all duration-200 hover:border-[#9999FF] hover:bg-white/5"
@@ -203,7 +203,7 @@
 				>
 			</button>
 		{:else}
-			<div class="px-2 text-[11px] text-zinc-600 italic">No applications discovered</div>
+			<div class="px-2 text-[11px] text-zinc-600 italic">No matching applications</div>
 		{/each}
 	</div>
 </nav>

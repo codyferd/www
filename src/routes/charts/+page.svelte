@@ -177,7 +177,7 @@
 							type="text"
 							bind:value={settings.title}
 							placeholder="Workspace Title..."
-							class="w-full rounded-[12px] border border-white/10 bg-white/3 px-4 py-2.5 text-xs text-white placeholder-white/30 transition duration-300 outline-none focus:border-[#9999FF]/50 focus:bg-white/6 focus:shadow-[0_0_20px_rgba(153,153,255,0.1)]"
+							class="w-full rounded-xl border border-white/10 bg-white/3 px-4 py-2.5 text-xs text-white placeholder-white/30 transition duration-300 outline-none focus:border-[#9999FF]/50 focus:bg-white/6 focus:shadow-[0_0_20px_rgba(153,153,255,0.1)]"
 						/>
 					</div>
 
@@ -281,7 +281,7 @@
 
 						<!-- Custom Scrollable Data Rows -->
 						<div
-							class="max-h-[300px] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent space-y-3 overflow-y-auto pr-2"
+							class="max-h-75 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent space-y-3 overflow-y-auto pr-2"
 						>
 							{#each nodes as node (node.id)}
 								<div

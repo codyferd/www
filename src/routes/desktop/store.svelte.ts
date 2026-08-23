@@ -72,19 +72,29 @@ export const DesktopEngine = $state({
 		this.isSidebarOpen = false;
 	},
 
+	// In your DesktopEngine class / store file:
+
+	// Inside your DesktopEngine class
+	get filteredAppList(): AppInstance[] {
+		const query = this.searchQuery.trim().toLowerCase();
+		if (!query) return this.sortedAppList;
+		return this.sortedAppList.filter((app: AppInstance) => app.title.toLowerCase().includes(query));
+	},
+
+	// 2. Updated search submission handler
 	handleSearchSubmit() {
 		const query = this.searchQuery.trim();
 		if (!query) return;
 
-		const localMatch = this.sortedAppList.find(
-			(app) => app.title.toLowerCase() === query.toLowerCase()
-		);
-		if (localMatch) {
-			this.launchNewDesktop(localMatch);
+		// If filtered results match any apps, launch the top matching result
+		const matches = this.filteredAppList;
+		if (matches.length > 0) {
+			this.launchNewDesktop(matches[0]);
 			this.searchQuery = '';
 			return;
 		}
 
+		// Direct URL handling
 		const isUrlPattern =
 			/^https?:\/\//i.test(query) || (query.includes('.') && !query.includes(' '));
 		if (isUrlPattern) {
@@ -112,6 +122,7 @@ export const DesktopEngine = $state({
 			return;
 		}
 
+		// Fallback to Google Search
 		const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&igu=1`;
 		const id = Date.now();
 		this.desktops.push({
