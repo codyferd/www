@@ -1,4 +1,4 @@
-AVERO-2026-08-22
+AVERO-2026-08-31
 
 Avero is an open source, web-based operating environment that is based on SvelteKit.
 Avero is meant to be easy and user-friendly, allowing for people to use the
