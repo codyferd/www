@@ -1,14 +1,14 @@
 export interface Source {
-  name: string;
-  link: string;
+	name: string;
+	link: string;
 }
 
 export interface GameSource {
-  source: string;
-  link: string;
+	source: string;
+	link: string;
 }
 
 export interface Game {
-  name: string;
-  sources: GameSource[];
+	name: string;
+	sources: GameSource[];
 }

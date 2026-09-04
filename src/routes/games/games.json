@@ -1,19 +1,48 @@
 [
-  {
-    "name": "Basket Random",
-    "sources": [
-      { "source": "Crazy Games", "link": "https://www.crazygames.com/game/basket-random" },
-      { "source": "Two Player Games", "link": "https://www.twoplayergames.org/game/basket-random" },
-      { "source": "Basket Random IO", "link": "https://basketrandom.io/" },
-      { "source": "Popular Google Doodle Games", "link": "https://sites.google.com/site/populardoodlegames/basket-random" },
-      { "source": "Basket Random GitHub", "link": "https://basket-random-free.github.io/" },
-      { "source": "Basket Random Game IO", "link": "https://basketrandomgame.io/" },
-      { "source": "Basket Random COM", "link": "https://basketrandom.com/" },
-      { "source": "Radioactive Studio", "link": "https://sites.google.com/view/radioactivestudiosok/basket-random" },
-      { "source": "Yandex", "link": "https://yandex.com/games/app/basket-random-197304" },
-      { "source": "Math Nook", "link": "https://www.mathnook.com/fun-games-2/basket-random.html" },
-      { "source": "AZGames", "link": "https://azgames.io/basket-random" },
-      { "source": "1001Games", "link": "https://www.1001games.com/sport/basket-random" }
-    ]
-  }
+	{
+		"name": "Basket Random",
+		"sources": [
+			{ "source": "Crazy Games", "link": "https://www.crazygames.com/game/basket-random" },
+			{ "source": "Two Player Games", "link": "https://www.twoplayergames.org/game/basket-random" },
+			{ "source": "Basket Random IO", "link": "https://basketrandom.io/" },
+			{
+				"source": "Popular Google Doodle Games",
+				"link": "https://sites.google.com/site/populardoodlegames/basket-random"
+			},
+			{ "source": "Basket Random GitHub", "link": "https://basket-random-free.github.io/" },
+			{ "source": "Basket Random Game IO", "link": "https://basketrandomgame.io/" },
+			{ "source": "Basket Random COM", "link": "https://basketrandom.com/" },
+			{
+				"source": "Radioactive Studio",
+				"link": "https://sites.google.com/view/radioactivestudiosok/basket-random"
+			},
+			{ "source": "Yandex", "link": "https://yandex.com/games/app/basket-random-197304" },
+			{ "source": "Math Nook", "link": "https://www.mathnook.com/fun-games-2/basket-random.html" },
+			{ "source": "AZGames", "link": "https://azgames.io/basket-random" },
+			{ "source": "1001Games", "link": "https://www.1001games.com/sport/basket-random" }
+		]
+	},
+	{
+		"name": "Fireboy and Watergirl",
+		"sources": [
+			{ "source": "Coolmathgames", "link": "https://www.coolmathgames.com/0-fireboy-and-water-girl-in-the-forest-temple" },
+			{ "source": "Fireboy-AndWatergirl IO", "link": "https://fireboy-andwatergirl.io/" },
+			{ "source": "Friv", "link": "https://www.friv.com/z/games/fireboyandwatergirlforest/game.html" },
+			{ "source": "Classroom 6x", "link": "https://sites.google.com/view/classroom6x/fireboy-and-watergirl" },
+			{ "source": "1001Games", "link": "https://www.1001games.com/adventure/fireboy-and-watergirl-1-forest-temple" }
+		]
+	},
+	{
+		"name": "Slope",
+		"sources": [
+			{ "source": "Slope IO", "link": "https://slopeio.org/" },
+			{ "source": "Slope Game AZ", "link": "https://slopegameaz.io/" },
+			{ "source": "Slope3", "link": "https://slope3.com/" },
+			{ "source": "Slope Game Online", "link": "https://slopegame-online.com/" },
+			{ "source": "Slope Game 2 IO", "link": "https://slopegame-2.io/" },
+			{ "source": "AZGames", "link": "https://azgames.io/slope" },
+			{ "source": "Slope Games ORG", "link": "https://slope-games.org/" },
+			{ "source": "Slope Gameplay", "link": "https://slopegameplay.io/" }
+		]
+	}
 ]
